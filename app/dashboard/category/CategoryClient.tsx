@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { PageCard } from "@/components/PageCard";
 import { Category } from "@/app/generated/prisma/browser";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import NoPermission from "../no-permission";
 import CategoryTable from "./components/categoryTable";
@@ -52,7 +53,7 @@ export default function CategoryClient({
   };
 
   return (
-    <div className=" rounded-lg border p-6 space-y-4">
+    <PageCard>
       <CategoryTable
         categories={categories}
         defaultSearch={defaultSearch}
@@ -60,7 +61,7 @@ export default function CategoryClient({
         permissions={permissions}
         headerActions={
           can("category:create") && (
-            <Button onClick={openCreate}>Add Category</Button>
+            <CustomButton onClick={openCreate}>Add Category</CustomButton>
           )
         }
       />
@@ -76,6 +77,6 @@ export default function CategoryClient({
           onSuccess={closeModal}
         />
       </CustomModal>
-    </div>
+    </PageCard>
   );
 }

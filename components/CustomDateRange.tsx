@@ -8,6 +8,8 @@ import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "./ui/calendar";
+import CustomButton from "./CustomButton";
+import { cn } from "@/lib/utils";
 
 export function DateRangeFilter({
   value,
@@ -56,10 +58,13 @@ export function DateRangeFilter({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <button
-          className={`border px-3 py-1 rounded text-sm flex items-center gap-2 cursor-pointer ${
-            hasValue ? "border-primary text-primary" : ""
-          }`}
+        <CustomButton
+          variant="outline"
+          size="sm"
+          className={cn(
+            "font-normal",
+            hasValue && "border-primary text-primary",
+          )}
         >
           <CalendarIcon className="size-3.5" />
           {label}
@@ -71,7 +76,7 @@ export function DateRangeFilter({
               <X className="size-3.5" />
             </span>
           )}
-        </button>
+        </CustomButton>
       </PopoverTrigger>
 
       <PopoverContent className="w-auto p-0" align="start">
@@ -97,22 +102,22 @@ export function DateRangeFilter({
                 ? `From ${format(localRange.from, "MMM d, yyyy")}`
                 : "Select a date range"}
           </span>
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                handleClearInside();
-              }}
-              className="cursor-pointer text-xs text-muted-foreground hover:text-foreground"
+          <div className="flex gap-2">
+            <CustomButton
+              variant="ghost"
+              size="xs"
+              onClick={handleClearInside}
+              className="text-muted-foreground"
             >
               Clear
-            </button>
-            <button
+            </CustomButton>
+            <CustomButton
+              size="xs"
               onClick={handleConfirm}
               disabled={!localRange.from}
-              className="cursor-pointer text-xs bg-primary text-primary-foreground px-3 py-1 rounded disabled:opacity-50"
             >
               Apply
-            </button>
+            </CustomButton>
           </div>
         </div>
       </PopoverContent>

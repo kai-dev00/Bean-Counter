@@ -2,7 +2,7 @@
 
 import { Category } from "@/app/generated/prisma/browser";
 import { DataTable, Column } from "@/components/DataTable";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { deleteCategory } from "../actions";
 import { useRouter } from "next/navigation";
@@ -79,6 +79,7 @@ export default function CategoryTable({
 
     {
       key: "totalPrice",
+      numeric: true,
       header: "Total Price",
       cell: (row) => formatPeso(row.totalPrice),
       exportValue: (row) => formatPeso(row.totalPrice),
@@ -98,33 +99,33 @@ export default function CategoryTable({
         <div className="flex justify-center">
           {can("category:read") && (
             <CustomTooltip content="View">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setViewCategory(row)}
               >
                 <Eye className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
 
           {can("category:update") && (
             <CustomTooltip content="Edit">
-              <Button size="sm" variant="ghost" onClick={() => onEdit(row)}>
+              <CustomButton size="sm" variant="ghost" onClick={() => onEdit(row)}>
                 <Pencil className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
 
           {can("category:delete") && (
             <CustomTooltip content="Delete">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setDeleteUser(row)}
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
         </div>
@@ -144,14 +145,14 @@ export default function CategoryTable({
           <div className="flex gap-2">
             {categories.length > 0 && (
               <CustomTooltip content="Download Excel">
-                <Button
+                <CustomButton
                   variant="outline"
                   onClick={() =>
                     downloadExcel(categories, columns, `Categories-${today}`)
                   }
                 >
                   <Download className="size-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
             )}
             {headerActions}
@@ -171,18 +172,18 @@ export default function CategoryTable({
           </p>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteUser(null)}>
+            <CustomButton variant="outline" onClick={() => setDeleteUser(null)}>
               Cancel
-            </Button>
+            </CustomButton>
 
-            <Button
+            <CustomButton
               variant="destructive"
               disabled={deleting}
               loading={deleting}
               onClick={handleDelete}
             >
               Delete Category
-            </Button>
+            </CustomButton>
           </div>
         </div>
       </CustomModal>

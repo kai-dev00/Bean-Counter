@@ -1,10 +1,11 @@
 "use client";
 
 import { Permission } from "@/lib/types";
+import { PageCard } from "@/components/PageCard";
 import NoPermission from "../no-permission";
 import { usePermission } from "@/lib/permissions/usePermission";
 import { Supplier } from "@/app/generated/prisma/browser";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { useState } from "react";
 import { CustomModal } from "@/components/CustomModal";
 import z from "zod";
@@ -57,7 +58,7 @@ export default function SupplierClient({
   };
 
   return (
-    <div className=" rounded-lg border p-6 space-y-4">
+    <PageCard>
       <SupplierTable
         suppliers={suppliers}
         defaultSearch={defaultSearch}
@@ -65,7 +66,7 @@ export default function SupplierClient({
         permissions={permissions}
         headerActions={
           can("supplier:create") && (
-            <Button onClick={openCreate}>Add Supplier</Button>
+            <CustomButton onClick={openCreate}>Add Supplier</CustomButton>
           )
         }
       />
@@ -80,6 +81,6 @@ export default function SupplierClient({
           onSuccess={closeModal}
         />
       </CustomModal>
-    </div>
+    </PageCard>
   );
 }

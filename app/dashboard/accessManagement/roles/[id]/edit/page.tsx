@@ -21,10 +21,14 @@ export default async function EditRolePage({ params }: Props) {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Edit Role</h1>
-        <p className="text-gray-600">Update role details and permissions</p>
+        <p className="text-muted-foreground">
+          Update role details and permissions
+        </p>
       </div>
 
       <RoleForm role={role} permissions={permissions} />
     </div>
   );
 }
+
+export const metadata = { title: "Edit Role" };

@@ -11,6 +11,7 @@ import {
 import { PurchaseFormValues } from "./schema";
 import { Decimal } from "@prisma/client/runtime/client";
 import { realtime } from "@/lib/upstash/realtime";
+import { computeInventoryStatus } from "../utils";
 
 export async function createPurchase(values: PurchaseFormValues) {
   const currentUser = await getCurrentUserWithName();
@@ -113,16 +114,27 @@ export async function receivePurchase(id: string) {
   if (purchase.status !== "DRAFT")
     throw new Error("Only DRAFT purchases can be received");
 
-  // update inventory quantities
+  // update inventory quantities, then recompute status from the new quantity
   await Promise.all(
-    purchase.items.map((item) =>
-      prisma.inventory.update({
+    purchase.items.map(async (item) => {
+      const updated = await prisma.inventory.update({
         where: { id: item.inventoryId },
         data: {
           quantity: { increment: item.quantity },
         },
-      }),
-    ),
+        select: { quantity: true, minimumStock: true, status: true },
+      });
+      await prisma.inventory.update({
+        where: { id: item.inventoryId },
+        data: {
+          status: computeInventoryStatus(
+            updated.quantity.toNumber(),
+            updated.minimumStock,
+            updated.status === "discontinued",
+          ),
+        },
+      });
+    }),
   );
 
   await updateWithLog(

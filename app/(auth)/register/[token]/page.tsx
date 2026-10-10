@@ -13,7 +13,7 @@ export default async function Page({ params }: PageProps) {
   if (!token) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-red-500">Invalid or missing invite token</p>
+        <p className="text-destructive">Invalid or missing invite token</p>
       </div>
     );
   }
@@ -33,8 +33,8 @@ export default async function Page({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-red-500">Invalid invite token</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-destructive">Invalid invite token</p>
+          <p className="text-sm text-muted-foreground">
             This invitation link may be incorrect.
           </p>
         </div>
@@ -46,8 +46,8 @@ export default async function Page({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-red-500">This invitation link has expired</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-destructive">This invitation link has expired</p>
+          <p className="text-sm text-muted-foreground">
             Please request a new invitation.
           </p>
         </div>
@@ -67,3 +67,5 @@ export default async function Page({ params }: PageProps) {
     />
   );
 }
+
+export const metadata = { title: "Register" };

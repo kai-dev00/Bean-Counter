@@ -23,3 +23,5 @@ export default async function ProfilePage() {
     />
   );
 }
+
+export const metadata = { title: "Profile" };

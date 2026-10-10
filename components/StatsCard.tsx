@@ -55,7 +55,7 @@
 //             <p
 //               className={cn(
 //                 "text-xs mt-1",
-//                 isPositive ? "text-green-600" : "text-red-500",
+//                 isPositive ? "text-green-600 dark:text-green-400" : "text-destructive",
 //               )}
 //             >
 //               {isPositive ? "▲" : "▼"} {Math.abs(trend.value)}%{" "}
@@ -97,23 +97,23 @@ type StatsCardProps = {
 
 const colorConfig = {
   default: {
-    icon: "bg-blue-50 text-blue-600",
-    active: "border-blue-500 bg-blue-50/50",
-    hover: "hover:border-blue-300",
+    icon: "bg-primary/10 text-primary",
+    active: "border-primary bg-primary/5",
+    hover: "hover:border-primary/40",
   },
   warning: {
-    icon: "bg-yellow-50 text-yellow-600",
-    active: "border-yellow-500 bg-yellow-50/50",
+    icon: "bg-yellow-50 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400",
+    active: "border-yellow-500 bg-yellow-50/50 dark:bg-yellow-500/10",
     hover: "hover:border-yellow-300",
   },
   danger: {
-    icon: "bg-red-50 text-red-600",
-    active: "border-red-500 bg-red-50/50",
+    icon: "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400",
+    active: "border-red-500 bg-red-50/50 dark:bg-red-500/10",
     hover: "hover:border-red-300",
   },
   success: {
-    icon: "bg-green-50 text-green-600",
-    active: "border-green-500 bg-green-50/50",
+    icon: "bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400",
+    active: "border-green-500 bg-green-50/50 dark:bg-green-500/10",
     hover: "hover:border-green-300",
   },
 };
@@ -153,7 +153,7 @@ export function StatsCard({
               <p
                 className={cn(
                   "text-xs flex items-center gap-1",
-                  isPositive ? "text-green-600" : "text-red-500",
+                  isPositive ? "text-green-600 dark:text-green-400" : "text-destructive",
                 )}
               >
                 <span>

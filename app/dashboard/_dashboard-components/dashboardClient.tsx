@@ -18,6 +18,7 @@ import { SpendOverTimeChart } from "./SpendOverTimeChart";
 import { CategoryValueChart } from "./CategoryValueChart";
 import { TopSuppliersChart } from "./TopSuppliersChart";
 import { ReorderList } from "./ReorderList";
+import { DashboardPanel } from "./DashboardPanel";
 
 type ActivityItem = {
   id: string;
@@ -119,16 +120,16 @@ export default function DashboardClient({
   };
 
   return (
-    <div className="space-y-6 flex gap-x-4 ">
-      {/* //left */}
-      <section className="w-3/4 flex gap-y-4 flex-col">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col xl:flex-row gap-4">
+      {/* left */}
+      <section className="flex-1 min-w-0 flex gap-y-4 flex-col">
+        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
           <StatsCard
             title="Inventory Value"
             value={formatPeso(totalInventoryValue)}
             icon={TrendingUp}
-            color="success"
-            description="Based on unit prices"
+            color="default"
+            description="Quantity × unit price"
           />
           <StatsCard
             title="Low Stock Items"
@@ -157,26 +158,24 @@ export default function DashboardClient({
           <SpendOverTimeChart data={monthlySpend} />
           <CategoryValueChart data={categoryValues} />
           <TopSuppliersChart data={topSuppliers} />
-          <div className="bg-white">
-            <InventoryStatusChart inventories={inventories} />
-          </div>
+          <InventoryStatusChart inventories={inventories} />
         </div>
       </section>
       {/* right */}
-      <section className="w-1/4  flex flex-col gap-y-4">
+      <section className="xl:w-80 2xl:w-96 shrink-0 flex flex-col gap-y-4">
         <ReorderList items={reorderItems} />
 
-        <div className="border rounded-lg p-4 space-y-3 ">
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-muted-foreground" />
-            <h3 className="font-semibold text-sm">Recent Activity</h3>
-            <span className="ml-auto flex items-center gap-1 text-xs text-green-500">
+        <DashboardPanel
+          title="Recent Activity"
+          icon={Activity}
+          action={
+            <span className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               Live
             </span>
-          </div>
-
-          <div className="space-y-2 max-h-90 overflow-y-auto">
+          }
+        >
+          <div className="space-y-1 max-h-90 overflow-y-auto -mx-2">
             {liveActivities.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">
                 No recent activity
@@ -198,7 +197,7 @@ export default function DashboardClient({
                   className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
                     actionColors[
                       activity.action as keyof typeof actionColors
-                    ] ?? "bg-gray-400"
+                    ] ?? "bg-muted-foreground"
                   }`}
                 />
                 <div className="flex-1">
@@ -233,7 +232,7 @@ export default function DashboardClient({
               </div>
             ))}
           </div>
-        </div>
+        </DashboardPanel>
       </section>
     </div>
   );

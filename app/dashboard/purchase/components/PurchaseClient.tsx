@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { PageCard } from "@/components/PageCard";
+import CustomButton from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import { Permission } from "@/lib/types";
 import { usePermission } from "@/lib/permissions/usePermission";
@@ -31,6 +32,7 @@ export type InventoryOption = {
   name: string;
   unit: string;
   unitPrice: number;
+  status: string | null;
 };
 
 type Props = {
@@ -68,14 +70,14 @@ export default function PurchaseClient({
   };
 
   return (
-    <div className=" rounded-lg border p-6 space-y-4">
+    <PageCard>
       <PurchaseTable
         purchases={purchases}
         onEdit={openEdit}
         permissions={permissions}
         headerActions={
           can("purchase:create") && (
-            <Button onClick={openCreate}>New Order</Button>
+            <CustomButton onClick={openCreate}>New Order</CustomButton>
           )
         }
       />
@@ -94,6 +96,6 @@ export default function PurchaseClient({
           onSuccess={closeModal}
         />
       </CustomModal>
-    </div>
+    </PageCard>
   );
 }

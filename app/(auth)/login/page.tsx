@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { loginAction } from "@/app/actions/auth.login";
 import { JSX, useState } from "react";
 import { CustomInput } from "@/components/CustomInput";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,20 +46,22 @@ export default function LoginForm(): JSX.Element {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md space-y-5 rounded-xl border bg-white p-6 shadow-sm"
+        className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">
             Welcome to Bean Counter!
           </h1>
-          <p className="text-sm text-gray-500">Log in to your account</p>
+          <p className="text-sm text-muted-foreground">
+            Log in to your account
+          </p>
         </div>
 
         {serverError && (
-          <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+          <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {serverError}
           </div>
         )}
@@ -77,15 +79,15 @@ export default function LoginForm(): JSX.Element {
           error={errors.password?.message}
           {...register("password")}
         />
-        <Button
+        <CustomButton
           type="submit"
           disabled={isSubmitting}
           loading={isSubmitting}
           className="w-full"
         >
           Login
-        </Button>
-        <div className="text-center text-sm text-gray-600">
+        </CustomButton>
+        <div className="text-center text-sm text-muted-foreground">
           <Link href="/forgotPassword" className="hover:underline">
             Forgot Password?
           </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Truck } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -8,25 +9,29 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { formatPeso } from "../utils";
+import { DashboardPanel } from "./DashboardPanel";
 
 type Props = {
   data: { name: string; total: number }[];
 };
 
 const chartConfig = {
-  total: { label: "Spend", color: "#8b5cf6" },
+  total: { label: "Spend", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
 export function TopSuppliersChart({ data }: Props) {
   return (
-    <div className="border rounded-lg p-5 space-y-3 bg-white">
-      <p className="font-semibold text-sm">Top Suppliers by Spend</p>
+    <DashboardPanel title="Top 5 Suppliers by Spend" icon={Truck}>
       {data.length === 0 ? (
         <p className="text-xs text-muted-foreground text-center py-8">
           No received purchases yet
         </p>
       ) : (
-        <ChartContainer config={chartConfig} className="h-56 w-full">
+        <ChartContainer
+          id="top-suppliers"
+          config={chartConfig}
+          className="h-52 w-full"
+        >
           <BarChart data={data} layout="vertical" margin={{ left: 8 }}>
             <XAxis type="number" hide />
             <YAxis
@@ -37,17 +42,22 @@ export function TopSuppliersChart({ data }: Props) {
               width={100}
             />
             <ChartTooltip
-              cursor={false}
+              cursor={{ fill: "var(--muted)" }}
               content={
                 <ChartTooltipContent
                   formatter={(value) => formatPeso(Number(value))}
                 />
               }
             />
-            <Bar dataKey="total" fill="var(--color-total)" radius={4} />
+            <Bar
+              dataKey="total"
+              fill="var(--color-total)"
+              radius={[0, 6, 6, 0]}
+              maxBarSize={28}
+            />
           </BarChart>
         </ChartContainer>
       )}
-    </div>
+    </DashboardPanel>
   );
 }

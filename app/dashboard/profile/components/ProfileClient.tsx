@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { changePasswordAction } from "@/app/actions/auth.change-password";
 import { useState } from "react";
 import { CustomInput } from "@/components/CustomInput";
+import CustomButton from "@/components/CustomButton";
 import { showToast } from "@/lib/toast";
 
 export type UserProps = {
@@ -65,9 +66,9 @@ export default function ProfileClient({ user }: Props) {
   return (
     <div className="max-w-lg space-y-6">
       {/* Profile info */}
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-900 text-lg font-semibold text-white">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
             {user.fullName?.[0] ?? "U"}
           </div>
 
@@ -110,7 +111,7 @@ export default function ProfileClient({ user }: Props) {
       </div>
 
       {/* Change password */}
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
         <h2 className="mb-4 font-medium">Change Password</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -140,13 +141,9 @@ export default function ProfileClient({ user }: Props) {
             })}
           />
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
-          >
+          <CustomButton type="submit" loading={isSubmitting}>
             {isSubmitting ? "Updating..." : "Update"}
-          </button>
+          </CustomButton>
         </form>
       </div>
     </div>

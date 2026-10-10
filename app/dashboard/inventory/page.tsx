@@ -58,3 +58,5 @@ export default async function InventoryPage({
     />
   );
 }
+
+export const metadata = { title: "Inventory" };

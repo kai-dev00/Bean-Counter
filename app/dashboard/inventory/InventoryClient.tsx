@@ -1,6 +1,7 @@
 "use client";
 
 import { Permission } from "@/lib/types";
+import { PageCard } from "@/components/PageCard";
 import NoPermission from "../no-permission";
 import { usePermission } from "@/lib/permissions/usePermission";
 import {
@@ -8,7 +9,7 @@ import {
   InventoryUnit,
   Prisma,
 } from "@/app/generated/prisma/browser";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import InventoryTable from "./components/inventoryTable";
 import { useState } from "react";
 import { CustomModal } from "@/components/CustomModal";
@@ -25,6 +26,7 @@ export const inventorySchema = z.object({
   unitPrice: z.number({ message: "Required" }).min(0, "Required"),
   unit: z.nativeEnum(InventoryUnit),
   categoryId: z.string().min(1, "Required"),
+  discontinued: z.boolean(),
 });
 export type InventoryFormValues = z.infer<typeof inventorySchema>;
 
@@ -110,8 +112,8 @@ export default function InventoryClient({
     : inventories;
 
   return (
-    <div className=" rounded-lg border p-6 space-y-4">
-      <div className="grid grid-cols-3 gap-x-6">
+    <PageCard>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <StatsCard
           title="Total Inventory"
           value={inventories.length.toString()}
@@ -137,7 +139,7 @@ export default function InventoryClient({
         <StatsCard
           title="Out of Stock"
           value={inventories
-            .filter((inv) => inv.quantity === 0)
+            .filter((inv) => inv.status === "out_of_stock")
             .length.toString()}
           icon={XCircle}
           trend={{ value: 2 }}
@@ -155,7 +157,7 @@ export default function InventoryClient({
         purchaseHistory={purchaseHistory}
         headerActions={
           can("inventory:create") && (
-            <Button onClick={openCreate}>Add Inventory</Button>
+            <CustomButton onClick={openCreate}>Add Inventory</CustomButton>
           )
         }
       />
@@ -172,6 +174,6 @@ export default function InventoryClient({
           categories={categories}
         />
       </CustomModal>
-    </div>
+    </PageCard>
   );
 }

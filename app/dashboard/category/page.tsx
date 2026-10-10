@@ -46,3 +46,5 @@ export default async function CategoriesPage({
     />
   );
 }
+
+export const metadata = { title: "Categories" };

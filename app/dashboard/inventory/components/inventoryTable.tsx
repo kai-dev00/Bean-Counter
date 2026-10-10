@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable, Column } from "@/components/DataTable";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { Pencil, Trash2, Eye, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
@@ -99,6 +99,7 @@ export default function InventoryTable({
     },
     {
       key: "quantity",
+      numeric: true,
       header: "Quantity",
       cell: (row) => {
         return (
@@ -113,6 +114,7 @@ export default function InventoryTable({
     },
     {
       key: "minimumStock",
+      numeric: true,
       header: "Minimum Stock",
       cell: (row) => {
         if (row.minimumStock == null) return <span>N/A</span>;
@@ -146,6 +148,7 @@ export default function InventoryTable({
 
     {
       key: "unitPrice",
+      numeric: true,
       header: "Unit Price",
       cell: (row) => {
         const unit = row.unit?.toLowerCase();
@@ -159,6 +162,7 @@ export default function InventoryTable({
     },
     {
       key: "totalAmount",
+      numeric: true,
       header: "Total Amount",
       cell: (row) => formatPeso(row.unitPrice * row.quantity),
       exportValue: (row) => formatPeso(row.unitPrice * row.quantity),
@@ -177,31 +181,31 @@ export default function InventoryTable({
         <div className="flex justify-center">
           {can("inventory:read") && (
             <CustomTooltip content="View">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setViewInventory(row)}
               >
                 <Eye className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
           {can("inventory:update") && (
             <CustomTooltip content="Edit">
-              <Button size="sm" variant="ghost" onClick={() => onEdit(row)}>
+              <CustomButton size="sm" variant="ghost" onClick={() => onEdit(row)}>
                 <Pencil className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
           {can("inventory:delete") && (
             <CustomTooltip content="Delete">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setDeleteUser(row)}
               >
                 <Trash2 className="h-4 w-4 " />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
         </div>
@@ -220,14 +224,14 @@ export default function InventoryTable({
           <div className="flex gap-2">
             {inventories.length > 0 && (
               <CustomTooltip content="Download Excel">
-                <Button
+                <CustomButton
                   variant="outline"
                   onClick={() =>
                     downloadExcel(inventories, columns, `Inventories-${today}`)
                   }
                 >
                   <Download className="size-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
             )}
             {headerActions}
@@ -253,9 +257,9 @@ export default function InventoryTable({
         ]}
         dateRangeKey="createdAt"
       />
-      {/* <Button onClick={() => downloadExcel(inventories, columns, "inventory")}>
+      {/* <CustomButton onClick={() => downloadExcel(inventories, columns, "inventory")}>
         Download Excel
-      </Button> */}
+      </CustomButton> */}
       <CustomModal
         open={!!deleteUser}
         onOpenChange={(v) => !v && setDeleteUser(null)}
@@ -268,18 +272,18 @@ export default function InventoryTable({
           </p>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteUser(null)}>
+            <CustomButton variant="outline" onClick={() => setDeleteUser(null)}>
               Cancel
-            </Button>
+            </CustomButton>
 
-            <Button
+            <CustomButton
               variant="destructive"
               disabled={deleting}
               loading={deleting}
               onClick={handleDelete}
             >
               Delete Inventory
-            </Button>
+            </CustomButton>
           </div>
         </div>
       </CustomModal>

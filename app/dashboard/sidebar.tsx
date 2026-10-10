@@ -15,6 +15,7 @@ import { FaCartFlatbed, FaClipboardList } from "react-icons/fa6";
 import { IoStatsChartSharp } from "react-icons/io5";
 import { IconType } from "react-icons";
 import LogoutButton from "@/components/LogoutButton";
+import CustomButton from "@/components/CustomButton";
 
 type SidebarUser = {
   fullName: string | null;
@@ -136,11 +137,11 @@ export default function DashboardSidebar({
     <aside
       onMouseEnter={() => isCollapsed && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={` flex h-screen flex-col bg-black text-white px-4 transition-[width] ease-in-out
+      className={` flex h-screen flex-col bg-sidebar text-sidebar-foreground px-4 transition-[width] ease-in-out
  duration-300 ${isExpanded ? "w-64" : "w-20"}`}
     >
       {/* Header */}
-      <div className="h-16 py-4 border-b border-gray-800 mb-2 flex items-center pl-3">
+      <div className="h-16 py-4 border-b border-sidebar-border mb-2 flex items-center pl-3">
         <div className="flex items-center gap-2 font-semibold text-lg">
           <LuCoffee className="size-5 shrink-0" />
           <span
@@ -165,16 +166,14 @@ export default function DashboardSidebar({
             <div key={item.label}>
               {hasSubItems ? (
                 <>
-                  <button
+                  <CustomButton
+                    variant={isActive ? "sidebar-active" : "sidebar"}
+                    size="nav"
                     onClick={() => isExpanded && toggleMenu(item.label)}
-                    className={`flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors w-full cursor-pointer ${
-                      isActive
-                        ? "bg-white text-black"
-                        : "text-gray-300 hover:bg-gray-800"
-                    }`}
+                    aria-expanded={isExpanded && isOpen}
                     title={!isExpanded ? item.label : undefined}
                   >
-                    <Icon className="h-5 w-5 shrink-0" />
+                    <Icon className="size-5 shrink-0" />
                     <span
                       className={`transition-opacity duration-300 whitespace-nowrap flex-1 text-left ${
                         !isExpanded
@@ -185,7 +184,7 @@ export default function DashboardSidebar({
                       {item.label}
                     </span>
                     <ChevronRight
-                      className={`h-4 w-4 shrink-0 transition-transform duration-300  ${
+                      className={`size-4 shrink-0 transition-transform duration-300  ${
                         !isExpanded
                           ? "opacity-0 w-0 overflow-hidden"
                           : isOpen
@@ -193,7 +192,7 @@ export default function DashboardSidebar({
                             : ""
                       }`}
                     />
-                  </button>
+                  </CustomButton>
 
                   {/* Submenu */}
                   <div
@@ -212,8 +211,8 @@ export default function DashboardSidebar({
                           href={subItem.href}
                           className={`block rounded px-3 py-1.5 text-sm ${
                             isSubActive
-                              ? "font-medium text-white"
-                              : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                              ? "font-medium text-sidebar-foreground"
+                              : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                           }`}
                         >
                           <span className="whitespace-nowrap">
@@ -225,26 +224,27 @@ export default function DashboardSidebar({
                   </div>
                 </>
               ) : (
-                <Link
-                  href={item.href!}
-                  className={`flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors ${
-                    isActive
-                      ? "bg-white text-black"
-                      : "text-gray-300 hover:bg-gray-800"
-                  }`}
-                  title={!isExpanded ? item.label : undefined}
+                <CustomButton
+                  asChild
+                  variant={isActive ? "sidebar-active" : "sidebar"}
+                  size="nav"
                 >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <span
-                    className={`transition-opacity duration-300 whitespace-nowrap ${
-                      !isExpanded
-                        ? "opacity-0 w-0 overflow-hidden"
-                        : "opacity-100"
-                    }`}
+                  <Link
+                    href={item.href!}
+                    title={!isExpanded ? item.label : undefined}
                   >
-                    {item.label}
-                  </span>
-                </Link>
+                    <Icon className="size-5 shrink-0" />
+                    <span
+                      className={`transition-opacity duration-300 whitespace-nowrap ${
+                        !isExpanded
+                          ? "opacity-0 w-0 overflow-hidden"
+                          : "opacity-100"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </CustomButton>
               )}
             </div>
           );
@@ -255,12 +255,12 @@ export default function DashboardSidebar({
 
       {/* User Profile */}
       {user && (
-        <div className="border-t border-gray-800 h-20  flex items-center gap-3 w-full  transition-opacity">
+        <div className="border-t border-sidebar-border h-20  flex items-center gap-3 w-full  transition-opacity">
           <Link
             href="/dashboard/profile"
             className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
           >
-            <div className="size-9 flex items-center justify-center rounded-full bg-gray-700 shrink-0">
+            <div className="size-9 flex items-center justify-center rounded-full bg-sidebar-accent shrink-0">
               {user.fullName?.[0] ?? "U"}
             </div>
 
@@ -273,7 +273,9 @@ export default function DashboardSidebar({
                 <p className="truncate text-sm font-medium">
                   {user.fullName ?? "User"}
                 </p>
-                <p className="truncate text-xs text-gray-400">{user.role}</p>
+                <p className="truncate text-xs text-sidebar-foreground/60">
+                  {user.role}
+                </p>
               </div>
             </div>
           </Link>

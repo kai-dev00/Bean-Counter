@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { logoutAction } from "../app/actions/auth.logout";
 import { CustomModal } from "@/components/CustomModal";
-import { Button } from "./ui/button";
+import CustomButton from "@/components/CustomButton";
 
 type LogoutButtonProps = {
   variant?: "icon" | "text";
@@ -23,21 +23,22 @@ export default function LogoutButton({
   return (
     <>
       {variant === "icon" ? (
-        <button
-          type="button"
+        <CustomButton
+          size="sm"
           onClick={handleClick}
-          className={`cursor-pointer rounded-md bg-black px-3 py-1.5 text-white hover:bg-gray-900 ${className}`}
+          aria-label="Logout"
+          className={className}
         >
           <BiLogOut />
-        </button>
+        </CustomButton>
       ) : (
-        <button
-          type="button"
+        <CustomButton
+          variant="ghost"
           onClick={handleClick}
-          className={`cursor-pointer w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors rounded ${className}`}
+          className={`w-full justify-start font-normal ${className}`}
         >
           Logout
-        </button>
+        </CustomButton>
       )}
 
       {/* Confirmation Modal */}
@@ -47,18 +48,18 @@ export default function LogoutButton({
         title="Confirm logout"
         footer={
           <div className="flex justify-end gap-2">
-            <Button
+            <CustomButton
               type="button"
               variant={"outline"}
               onClick={() => setOpen(false)}
             >
               Cancel
-            </Button>
+            </CustomButton>
 
             <form action={logoutAction}>
-              <Button type="submit" variant={"destructive"}>
+              <CustomButton type="submit" variant={"destructive"}>
                 Logout
-              </Button>
+              </CustomButton>
             </form>
           </div>
         }

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { RiMenuFold3Fill, RiMenuFill } from "react-icons/ri";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import CustomButton from "@/components/CustomButton";
 
 type SidebarUser = {
   fullName: string | null;
@@ -36,11 +38,12 @@ export default function DashboardHeader({
   const title = routeTitles[pathname] || "Dashboard";
 
   return (
-    <header className="h-16 border-b bg-white px-6 flex items-center justify-between shrink-0">
+    <header className="h-16 border-b bg-card px-4 sm:px-6 gap-2 flex items-center justify-between shrink-0">
       <div className="flex items-center gap-4">
-        <button
+        <CustomButton
+          variant="ghost"
+          size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 rounded hover:bg-gray-100 transition-colors text-gray-700 cursor-pointer"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -48,20 +51,25 @@ export default function DashboardHeader({
           ) : (
             <RiMenuFill className="size-5" />
           )}
-        </button>
+        </CustomButton>
         <h1 className="text-lg font-semibold">{title}</h1>
       </div>
 
-      <Link href="/dashboard/profile">
-        {user && (
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">
-              {user.fullName ?? "User"}
-            </p>
-            <p className="truncate text-xs text-gray-400">{user.role}</p>
-          </div>
-        )}
-      </Link>
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <Link href="/dashboard/profile">
+          {user && (
+            <div className="min-w-0 hidden sm:block">
+              <p className="truncate text-sm font-medium">
+                {user.fullName ?? "User"}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {user.role}
+              </p>
+            </div>
+          )}
+        </Link>
+      </div>
     </header>
   );
 }
