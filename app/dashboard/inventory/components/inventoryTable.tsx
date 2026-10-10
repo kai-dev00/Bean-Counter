@@ -161,7 +161,7 @@ export default function InventoryTable({
       key: "totalAmount",
       header: "Total Amount",
       cell: (row) => formatPeso(row.unitPrice * row.quantity),
-      exportValue: (row) => formatPeso(row.unitPrice),
+      exportValue: (row) => formatPeso(row.unitPrice * row.quantity),
     },
     {
       key: "createdAt",
