@@ -26,7 +26,7 @@ export default async function CategoriesPage({
   const categoriesWithTotal = categories.map((cat) => ({
     ...cat,
     totalPrice: cat.inventories.reduce(
-      (sum, inv) => sum + inv.unitPrice.toNumber(),
+      (sum, inv) => sum + inv.quantity.toNumber() * inv.unitPrice.toNumber(),
       0,
     ),
     inventories: cat.inventories.map((inv) => ({

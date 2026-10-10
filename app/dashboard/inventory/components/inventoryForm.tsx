@@ -13,6 +13,7 @@ import { CustomSelect } from "@/components/CustomSelect";
 
 import { Category, InventoryUnit } from "@/app/generated/prisma/browser";
 import { QuantityInput } from "./QantityInput";
+import { formatPeso } from "../../utils";
 
 const unitOptions = Object.values(InventoryUnit).map((u) => ({
   label: u,
@@ -67,6 +68,12 @@ export default function InventoryForm({
 
   const isEditMode = Boolean(inventory);
 
+  const unit = form.watch("unit").toLowerCase();
+  const quantity = form.watch("quantity");
+  const unitPrice = form.watch("unitPrice");
+  const showTotalPreview =
+    Number.isFinite(quantity) && Number.isFinite(unitPrice);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <CustomInput
@@ -96,32 +103,41 @@ export default function InventoryForm({
         required={!isEditMode}
         {...form.register("minimumStock", { valueAsNumber: true })}
       />
-      <CustomInput
-        type="number"
-        label="Unit Price"
-        prefix="₱"
-        step="any"
-        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        onKeyDown={(e) => {
-          if (
-            !/[\d.]/.test(e.key) &&
-            ![
-              "Backspace",
-              "Delete",
-              "Tab",
-              "ArrowLeft",
-              "ArrowRight",
-              "Decimal",
-              ",",
-            ].includes(e.key)
-          ) {
-            e.preventDefault();
-          }
-        }}
-        error={form.formState.errors.unitPrice?.message}
-        required={!isEditMode}
-        {...form.register("unitPrice", { valueAsNumber: true })}
-      />
+      <div className="space-y-1">
+        <CustomInput
+          type="number"
+          label="Unit Price"
+          prefix="₱"
+          suffix={`/ ${unit}`}
+          step="any"
+          className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          onKeyDown={(e) => {
+            if (
+              !/[\d.]/.test(e.key) &&
+              ![
+                "Backspace",
+                "Delete",
+                "Tab",
+                "ArrowLeft",
+                "ArrowRight",
+                "Decimal",
+                ",",
+              ].includes(e.key)
+            ) {
+              e.preventDefault();
+            }
+          }}
+          error={form.formState.errors.unitPrice?.message}
+          required={!isEditMode}
+          {...form.register("unitPrice", { valueAsNumber: true })}
+        />
+        {showTotalPreview && (
+          <p className="text-xs text-muted-foreground">
+            Total value: {formatPeso(quantity * unitPrice)} ({quantity} {unit} ×{" "}
+            {formatPeso(unitPrice)}/{unit})
+          </p>
+        )}
+      </div>
       <CustomSelect
         label="Category"
         placeholder="Select category"
