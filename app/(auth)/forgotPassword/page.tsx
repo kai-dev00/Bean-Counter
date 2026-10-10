@@ -4,7 +4,7 @@ import { forgotPasswordAction } from "@/app/actions/auth.forgot-password";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { CustomInput } from "@/components/CustomInput";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,13 +36,13 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-        <div className="w-full max-w-md space-y-5 rounded-xl border bg-white p-6 shadow-sm">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm">
           <h1 className="text-xl font-semibold">Reset link has been sent</h1>
           <p className="text-sm text-muted-foreground mt-2">
             Please check your email to proceed.
           </p>
-          <div className="mt-4 text-center text-sm text-gray-600">
+          <div className="mt-4 text-center text-sm text-muted-foreground">
             <Link href="/login" className="hover:underline">
               Back to Login
             </Link>
@@ -53,10 +53,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md space-y-5 rounded-xl border bg-white p-6 shadow-sm"
+        className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
         <h1 className="text-xl font-semibold mb-4">Forgot Password</h1>
         <CustomInput
@@ -67,15 +67,15 @@ export default function ForgotPasswordPage() {
           error={errors.email?.message}
           {...register("email")}
         />
-        <Button
+        <CustomButton
           type="submit"
           disabled={isSubmitting}
           loading={isSubmitting}
           className="w-full"
         >
           Send reset link
-        </Button>
-        <div className="text-center text-sm text-gray-600">
+        </CustomButton>
+        <div className="text-center text-sm text-muted-foreground">
           <Link href="/login" className="hover:underline">
             Back to Login
           </Link>

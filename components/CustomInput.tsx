@@ -39,10 +39,10 @@ export function CustomInput({
       <div className="flex items-center justify-between">
         <Label htmlFor={inputId}>
           {label}
-          {required && <span className="text-red-500">*</span>}
+          {required && <span className="text-destructive">*</span>}
         </Label>
 
-        {error && <span className="text-xs text-red-600">{error}</span>}
+        {error && <span className="text-xs text-destructive">{error}</span>}
       </div>
 
       {/* <Input

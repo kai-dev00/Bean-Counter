@@ -2,9 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CustomSelect } from "@/components/CustomSelect";
+import CustomDropdown from "@/components/CustomDropdown";
 import { CustomInput } from "@/components/CustomInput";
 import { editUserAction, inviteUserAction } from "../actions/users";
 import { useRouter } from "next/navigation";
@@ -128,7 +128,7 @@ export default function AccessManagementForm({
       )}
 
       {/* Role */}
-      <CustomSelect
+      <CustomDropdown
         label="Role"
         required={!isEditMode}
         placeholder="Select role"
@@ -158,7 +158,7 @@ export default function AccessManagementForm({
         <span className="text-sm">Active</span>
       </div>
 
-      <Button
+      <CustomButton
         type="submit"
         className="w-full"
         disabled={isSubmitting || (isEditMode && !isDirty)}
@@ -166,7 +166,7 @@ export default function AccessManagementForm({
       >
         {/* Send Invite */}
         {isEditMode ? "Update User" : "Send Invite"}
-      </Button>
+      </CustomButton>
     </form>
   );
 }

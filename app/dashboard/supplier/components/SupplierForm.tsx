@@ -3,7 +3,7 @@
 import { Supplier } from "@/app/generated/prisma/browser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { CustomInput } from "@/components/CustomInput";
@@ -88,9 +88,9 @@ export default function SupplierForm({
       />
 
       <div className="flex w-full justify-end">
-        <Button type="submit" loading={formState.isSubmitting}>
+        <CustomButton type="submit" loading={formState.isSubmitting}>
           {supplier ? "Update Supplier" : "Create Supplier"}
-        </Button>
+        </CustomButton>
       </div>
     </form>
   );

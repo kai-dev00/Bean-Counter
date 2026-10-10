@@ -14,8 +14,15 @@ import { realtime } from "@/lib/upstash/realtime";
 
 //only use decimal in the action serve and numbers in the client
 
-export async function createInventory(values: InventoryFormValues) {
-  const status = computeInventoryStatus(values.quantity, values.minimumStock);
+export async function createInventory({
+  discontinued,
+  ...values
+}: InventoryFormValues) {
+  const status = computeInventoryStatus(
+    values.quantity,
+    values.minimumStock,
+    discontinued,
+  );
 
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
@@ -56,7 +63,11 @@ export async function updateInventory(id: string, values: InventoryFormValues) {
   const existing = await prisma.inventory.findUnique({ where: { id } });
   if (!existing) throw new Error("Inventory not found");
 
-  const status = computeInventoryStatus(values.quantity, values.minimumStock);
+  const status = computeInventoryStatus(
+    values.quantity,
+    values.minimumStock,
+    values.discontinued,
+  );
   const updatedInventory = (await updateWithLog(
     "inventory",
     { id },

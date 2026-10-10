@@ -2,7 +2,7 @@
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { CustomInput } from "@/components/CustomInput";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
@@ -12,7 +12,7 @@ import { Trash2, Plus } from "lucide-react";
 import { formatPeso } from "../../utils";
 import { PurchaseFormValues, purchaseSchema } from "../schema";
 import { InventoryOption, PurchaseWithDetails } from "./PurchaseClient";
-import { CustomSelect } from "@/components/CustomSelect";
+import CustomDropdown from "@/components/CustomDropdown";
 
 type Props = {
   purchase: PurchaseWithDetails | null;
@@ -79,7 +79,7 @@ export default function PurchaseForm({
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       {/* Supplier */}
 
-      <CustomSelect
+      <CustomDropdown
         label="Supplier"
         placeholder="Select supplier"
         required
@@ -107,9 +107,9 @@ export default function PurchaseForm({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium">
-            Items <span className="text-red-500">*</span>
+            Items <span className="text-destructive">*</span>
           </label>
-          <Button
+          <CustomButton
             type="button"
             variant="outline"
             size="sm"
@@ -118,11 +118,11 @@ export default function PurchaseForm({
             }
           >
             <Plus className="h-3 w-3 mr-1" /> Add Item
-          </Button>
+          </CustomButton>
         </div>
 
         {form.formState.errors.items?.root && (
-          <p className="text-xs text-red-500">
+          <p className="text-xs text-destructive">
             {form.formState.errors.items.root.message}
           </p>
         )}
@@ -143,7 +143,7 @@ export default function PurchaseForm({
               key={field.id}
               className="grid grid-cols-[3fr_1fr_1fr_1fr_auto] gap-2 items-start max-h- "
             >
-              <CustomSelect
+              <CustomDropdown
                 label=""
                 placeholder="Select item"
                 value={form.watch(`items.${index}.inventoryId`)}
@@ -161,10 +161,17 @@ export default function PurchaseForm({
                 error={
                   form.formState.errors.items?.[index]?.inventoryId?.message
                 }
-                options={inventories.map((inv) => ({
-                  label: `${inv.name} (${inv.unit.toLowerCase()})`,
-                  value: inv.id,
-                }))}
+                // Discontinued items can't be added, but stay visible on lines that already use them
+                options={inventories
+                  .filter(
+                    (inv) =>
+                      inv.status !== "discontinued" ||
+                      inv.id === form.watch(`items.${index}.inventoryId`),
+                  )
+                  .map((inv) => ({
+                    label: `${inv.name} (${inv.unit.toLowerCase()})`,
+                    value: inv.id,
+                  }))}
               />
 
               {/* Quantity */}
@@ -198,14 +205,16 @@ export default function PurchaseForm({
               </div>
 
               {/* Remove */}
-              <button
-                type="button"
+              <CustomButton
+                variant="ghost"
+                size="icon"
                 onClick={() => remove(index)}
                 disabled={fields.length === 1}
-                className="cursor-pointer flex items-center justify-center h-9 w-9 text-muted-foreground hover:text-destructive disabled:opacity-30"
+                aria-label="Remove item"
+                className="text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </CustomButton>
             </div>
           ))}
         </div>
@@ -219,9 +228,9 @@ export default function PurchaseForm({
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" loading={form.formState.isSubmitting}>
+        <CustomButton type="submit" loading={form.formState.isSubmitting}>
           {purchase ? "Update Purchase" : "Create Purchase"}
-        </Button>
+        </CustomButton>
       </div>
     </form>
   );

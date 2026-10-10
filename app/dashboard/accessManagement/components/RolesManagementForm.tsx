@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { CustomInput } from "@/components/CustomInput";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { createRoleAction, updateRoleAction } from "../actions/roles";
 import Link from "next/link";
 import { PermissionTable } from "./PermissionTable";
 import { showToast } from "@/lib/toast";
+import { PageCard } from "@/components/PageCard";
 
 const roleSchema = z.object({
   name: z.string().min(1, "Role name is required"),
@@ -105,9 +106,7 @@ export function RoleForm({ role, permissions }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="rounded-lg border bg-white p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Role Details</h2>
-
+      <PageCard title="Role Details">
         <CustomInput
           label="Role Name"
           placeholder="e.g., MANAGER"
@@ -121,11 +120,9 @@ export function RoleForm({ role, permissions }: Props) {
           error={errors.description?.message}
           {...register("description")}
         />
-      </div>
+      </PageCard>
 
-      <div className="rounded-lg border bg-white p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Permissions</h2>
-
+      <PageCard title="Permissions">
         <div className="overflow-x-auto">
           <PermissionTable
             permissions={permissions}
@@ -134,22 +131,22 @@ export function RoleForm({ role, permissions }: Props) {
             onToggleMany={toggleMany}
           />
         </div>
-      </div>
+      </PageCard>
 
       <div className="flex gap-3">
         <Link href="/dashboard/accessManagement/roles" className="flex-1">
-          <Button
+          <CustomButton
             type="button"
             variant="outline"
             disabled={isSubmitting}
             className="w-full"
           >
             Cancel
-          </Button>
+          </CustomButton>
         </Link>
-        <Button type="submit" disabled={isSubmitting} className="flex-1">
+        <CustomButton type="submit" disabled={isSubmitting} className="flex-1">
           {isEdit ? "Update Role" : "Create Role"}
-        </Button>
+        </CustomButton>
       </div>
     </form>
   );

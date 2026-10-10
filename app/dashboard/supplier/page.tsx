@@ -12,3 +12,5 @@ export default async function SupplierPage() {
 
   return <SupplierClient suppliers={suppliers} permissions={permissions} />;
 }
+
+export const metadata = { title: "Suppliers" };

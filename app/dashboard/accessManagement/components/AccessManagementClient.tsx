@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { PageCard } from "@/components/PageCard";
 import { DataTable, Column } from "@/components/DataTable";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import AccessManagementForm from "./AccessManagementForm";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,8 @@ import { Permission } from "@/lib/types";
 import { usePermission } from "@/lib/permissions/usePermission";
 import { deleteAccessAction } from "../actions/users";
 import { CustomTooltip } from "@/components/CustomTooltip";
+import { Badge } from "@/components/ui/badge";
+import { badgeTones } from "../../utils";
 
 type EditUserData = {
   id: string;
@@ -101,15 +104,11 @@ export default function AccessManagementClient({
       key: "isActive",
       header: "Status",
       cell: (row) => (
-        <span
-          className={`px-2 py-1 text-xs rounded-full ${
-            row.isActive
-              ? "bg-green-100 text-green-700"
-              : "bg-gray-100 text-gray-600"
-          }`}
+        <Badge
+          className={row.isActive ? badgeTones.success : badgeTones.neutral}
         >
           {row.isActive ? "Active" : "Inactive"}
-        </span>
+        </Badge>
       ),
     },
     {
@@ -118,7 +117,9 @@ export default function AccessManagementClient({
       cell: (row) => (
         <span
           className={`text-xs ${
-            row.emailVerified ? "text-green-600" : "text-red-600"
+            row.emailVerified
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-600 dark:text-red-400"
           }`}
         >
           {row.emailVerified ? "Yes" : "No"}
@@ -138,20 +139,20 @@ export default function AccessManagementClient({
         <div className="flex justify-center">
           {can("access-management:update:users") && (
             <CustomTooltip content="Edit">
-              <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}>
+              <CustomButton size="sm" variant="ghost" onClick={() => handleEdit(row)}>
                 <Pencil className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
           {can("access-management:delete:users") && (
             <CustomTooltip content="Delete">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setDeleteUser(row)}
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
         </div>
@@ -160,15 +161,26 @@ export default function AccessManagementClient({
   ];
 
   return (
-    <div className=" rounded-lg border p-6 space-y-4">
+    <PageCard>
       <DataTable
         data={users}
         defaultSearch={defaultSearch}
         columns={columns}
         keyField="id"
+        filters={[
+          {
+            // rows store the role name, so filter on names
+            key: "role",
+            label: "Role",
+            options: roles.map((role) => ({
+              label: role.name,
+              value: role.name,
+            })),
+          },
+        ]}
         headerActions={
           can("access-management:create:users") && (
-            <Button onClick={handleAddNew}>Add User</Button>
+            <CustomButton onClick={handleAddNew}>Add User</CustomButton>
           )
         }
       />
@@ -201,11 +213,11 @@ export default function AccessManagementClient({
           </p>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteUser(null)}>
+            <CustomButton variant="outline" onClick={() => setDeleteUser(null)}>
               Cancel
-            </Button>
+            </CustomButton>
 
-            <Button
+            <CustomButton
               variant="destructive"
               disabled={deleting}
               loading={deleting}
@@ -214,10 +226,10 @@ export default function AccessManagementClient({
               {deleteUser?.source === "INVITE"
                 ? "Delete Invite"
                 : "Delete User"}
-            </Button>
+            </CustomButton>
           </div>
         </div>
       </CustomModal>
-    </div>
+    </PageCard>
   );
 }

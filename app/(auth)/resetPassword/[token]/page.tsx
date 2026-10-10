@@ -13,7 +13,7 @@ export default async function Page({ params }: PageProps) {
   if (!token) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-red-500">Invalid or missing reset token</p>
+        <p className="text-destructive">Invalid or missing reset token</p>
       </div>
     );
   }
@@ -26,8 +26,8 @@ export default async function Page({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-red-500">Invalid reset token</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-destructive">Invalid reset token</p>
+          <p className="text-sm text-muted-foreground">
             This link may have been used or is incorrect.
           </p>
         </div>
@@ -39,8 +39,8 @@ export default async function Page({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-red-500">This reset link has already been used</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-destructive">This reset link has already been used</p>
+          <p className="text-sm text-muted-foreground">
             Please request a new password reset.
           </p>
         </div>
@@ -52,8 +52,8 @@ export default async function Page({ params }: PageProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-red-500">This reset link has expired</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-destructive">This reset link has expired</p>
+          <p className="text-sm text-muted-foreground">
             Please request a new password reset.
           </p>
         </div>
@@ -63,3 +63,5 @@ export default async function Page({ params }: PageProps) {
 
   return <ResetPasswordForm token={token} />;
 }
+
+export const metadata = { title: "Reset Password" };

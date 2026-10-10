@@ -1,81 +1,48 @@
 "use client";
 
-import { Cell, Pie, PieChart } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
+import { Layers } from "lucide-react";
 import { formatPeso } from "../utils";
+import { DashboardPanel } from "./DashboardPanel";
 
 type Props = {
   data: { name: string; color: string | null; value: number }[];
 };
 
-const fallbackColors = ["#3b82f6", "#22c55e", "#f59e0b", "#a855f7", "#ef4444"];
-
+// Ranked bars in the theme color: easier to compare than a pie, and it
+// doesn't clash with whatever colors were picked for each category
 export function CategoryValueChart({ data }: Props) {
-  const slices = data.map((c, i) => ({
-    ...c,
-    fill: c.color ?? fallbackColors[i % fallbackColors.length],
-  }));
-  const chartConfig = Object.fromEntries(
-    slices.map((c) => [c.name, { label: c.name, color: c.fill }]),
-  ) satisfies ChartConfig;
+  const total = data.reduce((sum, c) => sum + c.value, 0);
+  const max = data[0]?.value ?? 0;
 
   return (
-    <div className="border rounded-lg p-5 space-y-3 bg-white">
-      <p className="font-semibold text-sm">Inventory Value by Category</p>
-      {slices.length === 0 ? (
+    <DashboardPanel title="Inventory Value by Category" icon={Layers}>
+      {data.length === 0 ? (
         <p className="text-xs text-muted-foreground text-center py-8">
           No inventory value yet
         </p>
       ) : (
-        <>
-          <ChartContainer config={chartConfig} className="h-44 w-full">
-            <PieChart>
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    formatter={(value, name) => (
-                      <span>
-                        {name}: {formatPeso(Number(value))}
-                      </span>
-                    )}
-                  />
-                }
-              />
-              <Pie
-                data={slices}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={45}
-                outerRadius={75}
-              >
-                {slices.map((c) => (
-                  <Cell key={c.name} fill={c.fill} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-          <div className="space-y-1">
-            {slices.map((c) => (
-              <div key={c.name} className="flex items-center gap-2 text-xs">
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: c.fill }}
-                />
-                <span className="text-muted-foreground truncate">{c.name}</span>
-                <span className="font-medium ml-auto">
+        <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
+          {data.map((c) => (
+            <div key={c.name} className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span className="truncate">{c.name}</span>
+                <span className="shrink-0 font-semibold tabular-nums">
                   {formatPeso(c.value)}
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                    {total > 0 ? Math.round((c.value / total) * 100) : 0}%
+                  </span>
                 </span>
               </div>
-            ))}
-          </div>
-        </>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${max > 0 ? (c.value / max) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-    </div>
+    </DashboardPanel>
   );
 }

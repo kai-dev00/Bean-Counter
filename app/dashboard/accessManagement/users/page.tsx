@@ -82,3 +82,5 @@ export default async function AccessManagement({
     />
   );
 }
+
+export const metadata = { title: "Users" };

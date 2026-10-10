@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable, Column } from "@/components/DataTable";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import {
   Pencil,
   Trash2,
@@ -25,15 +25,7 @@ import { cancelPurchase, deletePurchase, receivePurchase } from "../actions";
 import { CustomTooltip } from "@/components/CustomTooltip";
 import { PurchaseViewModal } from "./PurchaseViewModal";
 import { downloadExcel } from "../../utils/downloadExcel";
-
-const purchaseStatusConfig: Record<
-  PurchaseStatus,
-  { label: string; className: string }
-> = {
-  DRAFT: { label: "Draft", className: "bg-gray-100 text-gray-700" },
-  RECEIVED: { label: "Received", className: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "Cancelled", className: "bg-red-100 text-red-700" },
-};
+import { purchaseStatusConfig } from "../../utils";
 
 type Props = {
   purchases: PurchaseWithDetails[];
@@ -132,6 +124,7 @@ export default function PurchaseTable({
     },
     {
       key: "total",
+      numeric: true,
       header: "Total",
       cell: (row) => formatPeso(row.total),
       exportValue: (row) => formatPeso(row.total),
@@ -160,7 +153,7 @@ export default function PurchaseTable({
           {can("purchase:update") && row.status === "DRAFT" && (
             <>
               <CustomTooltip content="Mark as Received">
-                <Button
+                <CustomButton
                   size="sm"
                   variant="ghost"
                   className="text-green-600 hover:text-green-700"
@@ -168,10 +161,10 @@ export default function PurchaseTable({
                   onClick={() => handleReceive(row.id)}
                 >
                   <CheckCheck className="h-4 w-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
               <CustomTooltip content="Cancel">
-                <Button
+                <CustomButton
                   size="sm"
                   variant="ghost"
                   className="text-yellow-600 hover:text-yellow-700"
@@ -179,36 +172,36 @@ export default function PurchaseTable({
                   onClick={() => handleCancel(row.id)}
                 >
                   <XCircle className="h-4 w-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
               <CustomTooltip content="Edit">
-                <Button size="sm" variant="ghost" onClick={() => onEdit(row)}>
+                <CustomButton size="sm" variant="ghost" onClick={() => onEdit(row)}>
                   <Pencil className="h-4 w-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
             </>
           )}
           {can("purchase:read") && (
             <CustomTooltip content="View">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setViewPurchase(row)}
               >
                 <Eye className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
 
           {can("purchase:delete") && row.status === "DRAFT" && (
             <CustomTooltip content="Delete">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setDeletePurchaseItem(row)}
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
         </div>
@@ -227,14 +220,14 @@ export default function PurchaseTable({
           <div className="flex gap-2">
             {purchases.length > 0 && (
               <CustomTooltip content="Download Excel">
-                <Button
+                <CustomButton
                   variant="outline"
                   onClick={() =>
                     downloadExcel(purchases, columns, `Purchases-${today}`)
                   }
                 >
                   <Download className="size-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
             )}
             {headerActions}
@@ -267,20 +260,20 @@ export default function PurchaseTable({
             ?
           </p>
           <div className="flex justify-end gap-2">
-            <Button
+            <CustomButton
               variant="outline"
               onClick={() => setDeletePurchaseItem(null)}
             >
               Cancel
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="destructive"
               disabled={deleting}
               loading={deleting}
               onClick={handleDelete}
             >
               Delete
-            </Button>
+            </CustomButton>
           </div>
         </div>
       </CustomModal>

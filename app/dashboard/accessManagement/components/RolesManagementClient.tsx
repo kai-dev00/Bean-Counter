@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { PageCard } from "@/components/PageCard";
 import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { DataTable, Column } from "@/components/DataTable";
 import { CustomModal } from "@/components/CustomModal";
 import { deleteRoleAction } from "../actions/roles";
@@ -75,7 +76,7 @@ export function RolesManagementClient({
       key: "description",
       header: "Description",
       cell: (role) => (
-        <span className="text-gray-600">{role.description || "-"}</span>
+        <span className="text-muted-foreground">{role.description || "-"}</span>
       ),
     },
     {
@@ -97,21 +98,21 @@ export function RolesManagementClient({
           {can("access-management:update:roles") && (
             <CustomTooltip content="Edit">
               <Link href={`/dashboard/accessManagement/roles/${role.id}/edit`}>
-                <Button variant="ghost" size="sm">
+                <CustomButton variant="ghost" size="sm">
                   <Pencil className="h-4 w-4" />
-                </Button>
+                </CustomButton>
               </Link>
             </CustomTooltip>
           )}
           {can("access-management:delete:roles") && (
             <CustomTooltip content="Delete">
-              <Button
+              <CustomButton
                 variant="ghost"
                 size="sm"
                 onClick={() => setDeleteModal({ open: true, role })}
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
         </div>
@@ -120,7 +121,7 @@ export function RolesManagementClient({
   ];
 
   return (
-    <div className=" rounded-lg border p-6 space-y-4">
+    <PageCard>
       <DataTable<Role>
         data={roles}
         defaultSearch={defaultSearch}
@@ -129,7 +130,7 @@ export function RolesManagementClient({
         headerActions={
           can("access-management:create:roles") && (
             <Link href="roles/add">
-              <Button>Add Role</Button>
+              <CustomButton>Add Role</CustomButton>
             </Link>
           )
         }
@@ -145,15 +146,15 @@ export function RolesManagementClient({
         showCloseButton={!isDeleting}
         footer={
           <div className="flex gap-2 w-full">
-            <Button
+            <CustomButton
               variant="outline"
               onClick={() => setDeleteModal({ open: false, role: null })}
               disabled={isDeleting}
               className="flex-1"
             >
               Cancel
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="destructive"
               onClick={handleDelete}
               disabled={isDeleting}
@@ -161,7 +162,7 @@ export function RolesManagementClient({
               className="flex-1"
             >
               Delete
-            </Button>
+            </CustomButton>
           </div>
         }
       >
@@ -174,6 +175,6 @@ export function RolesManagementClient({
           </div>
         )}
       </CustomModal>
-    </div>
+    </PageCard>
   );
 }

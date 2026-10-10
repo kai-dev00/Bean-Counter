@@ -5,7 +5,7 @@ import {
   MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
 } from "react-icons/md";
-import { X } from "lucide-react";
+import { Inbox, Search, SearchX, X } from "lucide-react";
 import React, { useState, useMemo } from "react";
 import {
   Table,
@@ -19,6 +19,8 @@ import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import { inventoryStatusConfig } from "@/app/dashboard/utils";
 import { DateRangeFilter } from "./CustomDateRange";
+import CustomDropdown from "./CustomDropdown";
+import CustomButton from "./CustomButton";
 
 export type FilterOption = {
   label: string;
@@ -35,6 +37,8 @@ export type Column<T> = {
   header: string;
   cell?: (row: T) => React.ReactNode;
   className?: string;
+  /** Money/quantity columns: right-aligned with even-width digits */
+  numeric?: boolean;
   exportValue?: (row: T) => string | number | null; //for excel export, if not provided it will use the cell value
 };
 
@@ -67,7 +71,8 @@ export function DataTable<T extends Record<string, any>>({
   const [currentPage, setCurrentPage] = useState(1);
 
   //
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>(
+  // Each filter can have several values checked; a row matches any of them
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>(
     {},
   );
   const [dateRange, setDateRange] = useState<{
@@ -77,7 +82,6 @@ export function DataTable<T extends Record<string, any>>({
     from: null,
     to: null,
   });
-  const [openFilter, setOpenFilter] = useState<string | null>(null);
   // const filteredData = useMemo(() => {
   //   let result = data;
   //   if (idFilter) {
@@ -118,9 +122,11 @@ export function DataTable<T extends Record<string, any>>({
       );
     }
 
-    Object.entries(activeFilters).forEach(([key, value]) => {
-      if (value) {
-        result = result.filter((row) => String(row[key] ?? "") === value);
+    Object.entries(activeFilters).forEach(([key, values]) => {
+      if (values.length > 0) {
+        result = result.filter((row) =>
+          values.includes(String(row[key] ?? "")),
+        );
       }
     });
 
@@ -148,6 +154,20 @@ export function DataTable<T extends Record<string, any>>({
     return filteredData.slice(start, end);
   }, [filteredData, currentPage, pageSize]);
 
+  const hasActiveQuery =
+    Boolean(search) ||
+    Boolean(idFilter) ||
+    Boolean(dateRange.from) ||
+    Object.values(activeFilters).some((values) => values.length > 0);
+
+  const clearAll = () => {
+    setSearch("");
+    setIdFilter("");
+    setActiveFilters({});
+    setDateRange({ from: null, to: null });
+    setCurrentPage(1);
+  };
+
   const goToPage = (page: number) =>
     setCurrentPage(Math.min(Math.max(1, page), totalPages));
 
@@ -155,102 +175,81 @@ export function DataTable<T extends Record<string, any>>({
     <div>
       <div className="mb-2 flex justify-between items-center">
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+          <div className="relative w-64">
+            <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+                setIdFilter("");
+              }}
+              className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-full rounded-md border bg-transparent pl-8 pr-3 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:ring-[3px] placeholder:text-muted-foreground"
+            />
+          </div>
+          {filters.map((filter) => {
+            const selected = activeFilters[filter.key] ?? [];
+            const single =
+              selected.length === 1
+                ? filter.options.find((o) => o.value === selected[0])
+                : undefined;
+            const setSelected = (values: string[]) => {
+              setActiveFilters((prev) => ({ ...prev, [filter.key]: values }));
               setCurrentPage(1);
-              setIdFilter("");
-            }}
-            className="border px-4 py-1 rounded w-64 text-sm"
-          />
-          {filters.map((filter) => (
-            <div key={filter.key} className="relative">
-              <button
-                onClick={() =>
-                  setOpenFilter(openFilter === filter.key ? null : filter.key)
-                }
-                className={`border px-3 py-1 rounded text-sm flex items-center gap-2 cursor-pointer ${
-                  activeFilters[filter.key] ? "border-primary text-primary" : ""
-                }`}
-              >
-                {filter.label}
-                {activeFilters[filter.key] && (
-                  <Badge
+            };
+
+            return (
+              <CustomDropdown
+                key={filter.key}
+                multiple
+                options={filter.options}
+                value={selected}
+                onChange={setSelected}
+                searchable={filter.options.length > 7}
+                menuClassName="min-w-48"
+                trigger={
+                  <CustomButton
+                    variant="outline"
+                    size="sm"
                     className={cn(
-                      "flex items-center gap-1",
-                      filter.key === "status" && activeFilters[filter.key]
-                        ? inventoryStatusConfig[
-                            activeFilters[
-                              filter.key
-                            ] as keyof typeof inventoryStatusConfig
-                          ]?.className
-                        : "bg-black text-white",
+                      "font-normal",
+                      selected.length > 0 && "border-primary text-primary",
                     )}
                   >
-                    {
-                      filter.options.find(
-                        (o) => o.value === activeFilters[filter.key],
-                      )?.label
-                    }
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveFilters((prev) => ({
-                          ...prev,
-                          [filter.key]: "",
-                        }));
-                        setOpenFilter(null);
-                      }}
-                      className="hover:opacity-70 cursor-pointer"
-                    >
-                      <X className="size-4" />
-                    </span>
-                  </Badge>
-                )}
-                ▾
-              </button>
-
-              {openFilter === filter.key && (
-                <div className="absolute z-10 top-full mt-1 bg-white border rounded shadow-md min-w-36 text-sm">
-                  <button
-                    className="w-full text-left px-3 py-2 hover:bg-muted text-muted-foreground"
-                    onClick={() => {
-                      setActiveFilters((prev) => ({
-                        ...prev,
-                        [filter.key]: "",
-                      }));
-                      setOpenFilter(null);
-                    }}
-                  >
-                    All
-                  </button>
-                  {filter.options.map((opt) => (
-                    <button
-                      key={opt.value}
-                      className={`w-full text-left px-3 py-2 hover:bg-muted ${
-                        activeFilters[filter.key] === opt.value
-                          ? "font-semibold text-primary"
-                          : ""
-                      }`}
-                      onClick={() => {
-                        setActiveFilters((prev) => ({
-                          ...prev,
-                          [filter.key]: opt.value,
-                        }));
-                        setCurrentPage(1);
-                        setOpenFilter(null);
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                    {filter.label}
+                    {selected.length > 0 && (
+                      <Badge
+                        className={cn(
+                          "flex items-center gap-1",
+                          // One status picked: show it in that status's color
+                          filter.key === "status" && single
+                            ? inventoryStatusConfig[
+                                single.value as keyof typeof inventoryStatusConfig
+                              ]?.className
+                            : "bg-primary text-primary-foreground",
+                        )}
+                      >
+                        {single ? single.label : `${selected.length} selected`}
+                        <span
+                          onClick={(e) => {
+                            // clear without opening the menu
+                            e.stopPropagation();
+                            setSelected([]);
+                          }}
+                          className="hover:opacity-70 cursor-pointer"
+                        >
+                          <X className="size-4" />
+                        </span>
+                      </Badge>
+                    )}
+                    ▾
+                  </CustomButton>
+                }
+              />
+            );
+          })}
           {dateRangeKey && (
             <DateRangeFilter
               value={dateRange}
@@ -266,9 +265,18 @@ export function DataTable<T extends Record<string, any>>({
 
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-muted/60 hover:bg-muted/60">
             {columns.map((col) => (
-              <TableHead key={String(col.key)}>{col.header}</TableHead>
+              <TableHead
+                key={String(col.key)}
+                className={cn(
+                  "text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+                  col.numeric && "text-right",
+                  col.className,
+                )}
+              >
+                {col.header}
+              </TableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -277,8 +285,35 @@ export function DataTable<T extends Record<string, any>>({
           {paginatedData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length}>
-                <div className="h-[480px] flex items-center justify-center text-sm text-muted-foreground">
-                  No data available.
+                <div className="h-[480px] flex flex-col items-center justify-center gap-3 text-center">
+                  <div className="rounded-full bg-muted p-3 text-muted-foreground">
+                    {hasActiveQuery ? (
+                      <SearchX className="size-6" />
+                    ) : (
+                      <Inbox className="size-6" />
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      {hasActiveQuery
+                        ? "No results match your filters"
+                        : "Nothing here yet"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {hasActiveQuery
+                        ? "Try a different search or clear the filters."
+                        : "Records you add will show up here."}
+                    </p>
+                  </div>
+                  {hasActiveQuery && (
+                    <CustomButton
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAll}
+                    >
+                      Clear filters
+                    </CustomButton>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
@@ -287,7 +322,13 @@ export function DataTable<T extends Record<string, any>>({
               {paginatedData.map((row) => (
                 <TableRow key={String(row[keyField])} className="h-10">
                   {columns.map((col) => (
-                    <TableCell key={String(col.key)} className={col.className}>
+                    <TableCell
+                      key={String(col.key)}
+                      className={cn(
+                        col.numeric && "text-right tabular-nums",
+                        col.className,
+                      )}
+                    >
                       {col.cell
                         ? col.cell(row)
                         : String(row[col.key as keyof T] ?? "")}
@@ -297,7 +338,10 @@ export function DataTable<T extends Record<string, any>>({
               ))}
 
               {Array.from({ length: 11 - paginatedData.length }).map((_, i) => (
-                <TableRow key={`empty-${i}`} className="h-12">
+                <TableRow
+                  key={`empty-${i}`}
+                  className="h-12 hover:bg-transparent"
+                >
                   {columns.map((col, j) => (
                     <TableCell key={j}>&nbsp;</TableCell>
                   ))}
@@ -315,36 +359,43 @@ export function DataTable<T extends Record<string, any>>({
           Page {currentPage} of {totalPages || 1}
         </span>
 
-        <div className="flex">
-          <button
+        <div className="flex gap-1">
+          <CustomButton
+            variant="outline"
+            size="icon-sm"
             onClick={() => goToPage(1)}
             disabled={currentPage === 1}
-            className="px-2 py-1 border rounded-l-md disabled:opacity-50"
+            aria-label="First page"
           >
             <MdKeyboardDoubleArrowLeft />
-          </button>
-          <button
+          </CustomButton>
+          <CustomButton
+            variant="outline"
+            size="icon-sm"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-2 py-1 border  disabled:opacity-50"
+            aria-label="Previous page"
           >
             <MdKeyboardArrowLeft />
-          </button>
-
-          <button
+          </CustomButton>
+          <CustomButton
+            variant="outline"
+            size="icon-sm"
             onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-2 py-1 border  disabled:opacity-50"
+            disabled={currentPage >= totalPages}
+            aria-label="Next page"
           >
             <MdKeyboardArrowRight />
-          </button>
-          <button
+          </CustomButton>
+          <CustomButton
+            variant="outline"
+            size="icon-sm"
             onClick={() => goToPage(totalPages)}
-            disabled={currentPage === totalPages}
-            className="px-2 py-1 border rounded-r-md disabled:opacity-50"
+            disabled={currentPage >= totalPages}
+            aria-label="Last page"
           >
             <MdKeyboardDoubleArrowRight />
-          </button>
+          </CustomButton>
         </div>
       </div>
     </div>

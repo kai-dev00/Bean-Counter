@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable, Column } from "@/components/DataTable";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { Pencil, Trash2, Eye, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
@@ -113,31 +113,31 @@ export default function SupplierTable({
         <div className="flex justify-center">
           {can("supplier:read") && (
             <CustomTooltip content="View">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setViewSupplier(row)}
               >
                 <Eye className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
           {can("supplier:update") && (
             <CustomTooltip content="Edit">
-              <Button size="sm" variant="ghost" onClick={() => onEdit(row)}>
+              <CustomButton size="sm" variant="ghost" onClick={() => onEdit(row)}>
                 <Pencil className="h-4 w-4" />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
           {can("supplier:delete") && (
             <CustomTooltip content="Delete">
-              <Button
+              <CustomButton
                 size="sm"
                 variant="ghost"
                 onClick={() => setDeleteUser(row)}
               >
                 <Trash2 className="h-4 w-4 " />
-              </Button>
+              </CustomButton>
             </CustomTooltip>
           )}
         </div>
@@ -157,14 +157,14 @@ export default function SupplierTable({
           <div className="flex gap-2">
             {suppliers.length > 0 && (
               <CustomTooltip content="Download Excel">
-                <Button
+                <CustomButton
                   variant="outline"
                   onClick={() =>
                     downloadExcel(suppliers, columns, `Suppliers-${today}`)
                   }
                 >
                   <Download className="size-4" />
-                </Button>
+                </CustomButton>
               </CustomTooltip>
             )}
             {headerActions}
@@ -183,18 +183,18 @@ export default function SupplierTable({
           </p>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteUser(null)}>
+            <CustomButton variant="outline" onClick={() => setDeleteUser(null)}>
               Cancel
-            </Button>
+            </CustomButton>
 
-            <Button
+            <CustomButton
               variant="destructive"
               disabled={deleting}
               loading={deleting}
               onClick={handleDelete}
             >
               Delete Supplier
-            </Button>
+            </CustomButton>
           </div>
         </div>
       </CustomModal>

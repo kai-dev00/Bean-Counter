@@ -1,141 +1,117 @@
 "use client";
 
-import { PolarRadiusAxis, RadialBar, RadialBarChart, Label } from "recharts";
+import { Cell, Label, Pie, PieChart } from "recharts";
+import { PackageCheck } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { DashboardPanel } from "./DashboardPanel";
 
 type Props = {
-  inventories: {
-    status: string | null;
-  }[];
-  showLegend?: boolean;
+  inventories: { status: string | null }[];
 };
 
+// Same hues as the status badges, so the chart and the tables agree
 const chartConfig = {
   in_stock: { label: "In Stock", color: "#22c55e" },
   low_stock: { label: "Low Stock", color: "#f59e0b" },
-  out_of_stock: { label: "Out of Stock", color: "#ef4444" },
   warning: { label: "Warning", color: "#f97316" },
-  discontinued: { label: "Discontinued", color: "#6b7280" },
+  out_of_stock: { label: "Out of Stock", color: "#ef4444" },
+  discontinued: { label: "Discontinued", color: "#94a3b8" },
 } satisfies ChartConfig;
 
-export function InventoryStatusChart({
-  inventories,
-  showLegend = true,
-}: Props) {
-  const counts = {
-    in_stock: inventories.filter((i) => i.status === "in_stock").length,
-    low_stock: inventories.filter((i) => i.status === "low_stock").length,
-    out_of_stock: inventories.filter((i) => i.status === "out_of_stock").length,
-    warning: inventories.filter((i) => i.status === "warning").length,
-    discontinued: inventories.filter((i) => i.status === "discontinued").length,
-  };
+type StatusKey = keyof typeof chartConfig;
 
-  const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  const chartData = [counts];
+export function InventoryStatusChart({ inventories }: Props) {
+  const slices = (Object.keys(chartConfig) as StatusKey[]).map((key) => ({
+    key,
+    label: chartConfig[key].label,
+    fill: chartConfig[key].color,
+    value: inventories.filter((i) => i.status === key).length,
+  }));
+  const visibleSlices = slices.filter((s) => s.value > 0);
+  const total = slices.reduce((sum, s) => sum + s.value, 0);
 
   return (
-    <div className="border rounded-lg p-5 space-y-3">
-      <p className="font-semibold text-sm">Inventory Status Count</p>
-      <ChartContainer
-        config={chartConfig}
-        className="mx-auto aspect-square w-full max-w-62.5"
-      >
-        <RadialBarChart
-          data={chartData}
-          endAngle={180}
-          innerRadius={70}
-          outerRadius={130}
-        >
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-            <Label
-              content={({ viewBox }) => {
-                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                  return (
-                    <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
-                      <tspan
-                        x={viewBox.cx}
-                        y={(viewBox.cy || 0) - 16}
-                        className="fill-foreground text-2xl font-bold"
-                      >
-                        {total}
-                      </tspan>
-                      <tspan
-                        x={viewBox.cx}
-                        y={(viewBox.cy || 0) + 4}
-                        className="fill-muted-foreground text-xs"
-                      >
-                        Total Items
-                      </tspan>
-                    </text>
-                  );
-                }
-              }}
-            />
-          </PolarRadiusAxis>
-          <RadialBar
-            dataKey="in_stock"
-            stackId="a"
-            cornerRadius={3}
-            fill="var(--color-in_stock)"
-            className="stroke-transparent stroke-2"
-          />
-          <RadialBar
-            dataKey="low_stock"
-            stackId="a"
-            cornerRadius={3}
-            fill="var(--color-low_stock)"
-            className="stroke-transparent stroke-2"
-          />
-          <RadialBar
-            dataKey="out_of_stock"
-            stackId="a"
-            cornerRadius={3}
-            fill="var(--color-out_of_stock)"
-            className="stroke-transparent stroke-2"
-          />
-          <RadialBar
-            dataKey="warning"
-            stackId="a"
-            cornerRadius={3}
-            fill="var(--color-warning)"
-            className="stroke-transparent stroke-2"
-          />
-          <RadialBar
-            dataKey="discontinued"
-            stackId="a"
-            cornerRadius={3}
-            fill="var(--color-discontinued)"
-            className="stroke-transparent stroke-2"
-          />
-        </RadialBarChart>
-      </ChartContainer>
-
-      {/* Legend */}
-      {showLegend && (
-        <div className="grid grid-cols-2 gap-1">
-          {Object.entries(chartConfig).map(([key, config]) => (
-            <div key={key} className="flex items-center gap-2 text-xs">
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: config.color }}
+    <DashboardPanel title="Stock Health" icon={PackageCheck}>
+      {total === 0 ? (
+        <p className="text-xs text-muted-foreground text-center py-8">
+          No inventory yet
+        </p>
+      ) : (
+        <div className="flex items-center gap-6">
+          <ChartContainer
+            id="stock-health"
+            config={chartConfig}
+            className="aspect-square h-44 shrink-0"
+          >
+            <PieChart>
+              <ChartTooltip
+                content={<ChartTooltipContent hideLabel nameKey="key" />}
               />
-              <span className="text-muted-foreground">{config.label}</span>
-              <span className="font-medium ml-auto">
-                {counts[key as keyof typeof counts]}
-              </span>
-            </div>
-          ))}
+              <Pie
+                data={visibleSlices}
+                dataKey="value"
+                nameKey="key"
+                innerRadius={52}
+                outerRadius={76}
+                strokeWidth={3}
+                stroke="var(--card)"
+              >
+                {visibleSlices.map((s) => (
+                  <Cell key={s.key} fill={s.fill} />
+                ))}
+                <Label
+                  content={({ viewBox }) => {
+                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                      return (
+                        <text
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                        >
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy || 0) - 6}
+                            className="fill-foreground text-2xl font-bold"
+                          >
+                            {total}
+                          </tspan>
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy || 0) + 16}
+                            className="fill-muted-foreground text-xs"
+                          >
+                            items
+                          </tspan>
+                        </text>
+                      );
+                    }
+                  }}
+                />
+              </Pie>
+            </PieChart>
+          </ChartContainer>
+          <div className="flex-1 space-y-3">
+            {slices.map((s) => (
+              <div key={s.key} className="flex items-center gap-2 text-sm">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: s.fill }}
+                />
+                <span className="text-muted-foreground">{s.label}</span>
+                <span className="font-semibold ml-auto tabular-nums">
+                  {s.value}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-    </div>
+    </DashboardPanel>
   );
 }

@@ -3,7 +3,7 @@
 import { Category } from "@/app/generated/prisma/browser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { createCategory, updateCategory } from "../actions";
@@ -88,9 +88,9 @@ export default function CategoryForm({
       </div>
 
       <div className="flex w-full justify-end">
-        <Button type="submit" loading={formState.isSubmitting}>
+        <CustomButton type="submit" loading={formState.isSubmitting}>
           {category ? "Update Category" : "Create Category"}
-        </Button>
+        </CustomButton>
       </div>
     </form>
   );

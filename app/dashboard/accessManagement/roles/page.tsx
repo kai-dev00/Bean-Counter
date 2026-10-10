@@ -21,3 +21,5 @@ export default async function RolesPage({
     />
   );
 }
+
+export const metadata = { title: "Roles" };

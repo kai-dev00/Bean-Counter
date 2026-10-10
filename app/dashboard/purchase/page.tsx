@@ -21,7 +21,13 @@ export default async function PurchasesPage() {
       prisma.supplier.findMany({ orderBy: { name: "asc" } }),
       prisma.inventory.findMany({
         orderBy: { name: "asc" },
-        select: { id: true, name: true, unit: true, unitPrice: true },
+        select: {
+          id: true,
+          name: true,
+          unit: true,
+          unitPrice: true,
+          status: true,
+        },
       }),
       getCurrentUserWithDetails(),
     ]);
@@ -52,3 +58,5 @@ export default async function PurchasesPage() {
     />
   );
 }
+
+export const metadata = { title: "Purchases" };

@@ -2,21 +2,22 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { CustomInput } from "@/components/CustomInput";
 import { createInventory, updateInventory } from "../actions";
 import { inventorySchema, InventoryWithCategory } from "../InventoryClient";
 import { InventoryFormValues } from "../InventoryClient";
-import { CustomSelect } from "@/components/CustomSelect";
+import CustomDropdown from "@/components/CustomDropdown";
 
 import { Category, InventoryUnit } from "@/app/generated/prisma/browser";
 import { QuantityInput } from "./QantityInput";
 import { formatPeso } from "../../utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const unitOptions = Object.values(InventoryUnit).map((u) => ({
-  label: u,
+  label: u.toLowerCase(), // match how units show in the table (pcs, kg, ...)
   value: u,
 }));
 
@@ -44,6 +45,7 @@ export default function InventoryForm({
       unitPrice: inventory?.unitPrice ?? undefined,
       unit: inventory?.unit ?? InventoryUnit.PCS,
       categoryId: inventory?.categoryId ?? "",
+      discontinued: inventory?.status === "discontinued",
     },
   });
 
@@ -97,7 +99,7 @@ export default function InventoryForm({
       <CustomInput
         type="number"
         label="Minimum Stock"
-        suffix={form.watch("unit")}
+        suffix={unit}
         className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         error={form.formState.errors.minimumStock?.message}
         required={!isEditMode}
@@ -138,7 +140,7 @@ export default function InventoryForm({
           </p>
         )}
       </div>
-      <CustomSelect
+      <CustomDropdown
         label="Category"
         placeholder="Select category"
         value={form.watch("categoryId")}
@@ -158,10 +160,25 @@ export default function InventoryForm({
         error={form.formState.errors.description?.message}
         {...form.register("description")}
       />
+      <label className="flex items-start gap-2 cursor-pointer">
+        <Checkbox
+          className="mt-0.5"
+          checked={form.watch("discontinued")}
+          onCheckedChange={(v) =>
+            form.setValue("discontinued", Boolean(v), { shouldDirty: true })
+          }
+        />
+        <span className="space-y-0.5">
+          <span className="block text-sm font-medium">Discontinued</span>
+          <span className="block text-xs text-muted-foreground">
+            No longer stocked. Hidden from restock alerts and new purchases.
+          </span>
+        </span>
+      </label>
       <div className="flex w-full justify-end">
-        <Button type="submit" loading={formState.isSubmitting}>
+        <CustomButton type="submit" loading={formState.isSubmitting}>
           {inventory ? "Update Inventory" : "Create Inventory"}
-        </Button>
+        </CustomButton>
       </div>
     </form>
   );

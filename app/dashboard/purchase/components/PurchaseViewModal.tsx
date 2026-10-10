@@ -1,20 +1,10 @@
 "use client";
 
 import { CustomModal } from "@/components/CustomModal";
-import { formatDate, formatPeso } from "../../utils";
+import { formatDate, formatPeso, purchaseStatusConfig } from "../../utils";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { PurchaseStatus } from "@/app/generated/prisma/browser";
 import { PurchaseWithDetails } from "./PurchaseClient";
-
-const purchaseStatusConfig: Record<
-  PurchaseStatus,
-  { label: string; className: string }
-> = {
-  DRAFT: { label: "Draft", className: "bg-gray-100 text-gray-700" },
-  RECEIVED: { label: "Received", className: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "Cancelled", className: "bg-red-100 text-red-700" },
-};
 
 type Props = {
   purchase: PurchaseWithDetails | null;

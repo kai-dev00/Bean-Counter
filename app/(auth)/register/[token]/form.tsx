@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { CustomInput } from "@/components/CustomInput";
 import { useRouter } from "next/navigation";
 import { registerUserAction } from "@/app/actions/auth.register";
@@ -73,10 +73,10 @@ export default function RegisterForm({ token, inviteData }: Props) {
 
   return (
     <>
-      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full max-w-md space-y-5 rounded-xl border bg-white p-6 shadow-sm"
+          className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
         >
           <h1 className="text-xl font-semibold mb-4">
             Complete Your Registration
@@ -117,14 +117,14 @@ export default function RegisterForm({ token, inviteData }: Props) {
             {...register("confirmPassword")}
           />
 
-          <Button
+          <CustomButton
             type="submit"
             className="w-full"
             disabled={isSubmitting}
             loading={isSubmitting}
           >
             Register
-          </Button>
+          </CustomButton>
         </form>
       </main>
 
@@ -135,14 +135,14 @@ export default function RegisterForm({ token, inviteData }: Props) {
         description="Your account has been created successfully. You can now log in with your credentials."
         showCloseButton={false}
         footer={
-          <Button onClick={() => router.push("/login")} className="w-full">
+          <CustomButton onClick={() => router.push("/login")} className="w-full">
             Go to Login
-          </Button>
+          </CustomButton>
         }
       >
         <div className="text-center py-4">
           <div className="text-6xl mb-4">✓</div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Welcome to Coffee Shop Inventory, {inviteData.firstName}!
           </p>
         </div>

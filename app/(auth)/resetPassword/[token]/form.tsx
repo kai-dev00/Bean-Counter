@@ -2,7 +2,7 @@
 
 import { resetPasswordAction } from "@/app/actions/auth.reset-password";
 import { CustomInput } from "@/components/CustomInput";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/CustomButton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -31,10 +31,10 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md space-y-5 rounded-xl border bg-white p-6 shadow-sm"
+        className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
         <h1 className="text-xl font-semibold mb-4">Reset Password</h1>
 
@@ -45,14 +45,14 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           {...register("password")}
         />
 
-        <Button
+        <CustomButton
           type="submit"
           className="w-full"
           disabled={isSubmitting}
           loading={isSubmitting}
         >
           Reset Password
-        </Button>
+        </CustomButton>
       </form>
     </main>
   );
