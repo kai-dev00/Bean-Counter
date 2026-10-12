@@ -40,10 +40,11 @@ export async function refreshAction() {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { roleId: true },
+    select: { roleId: true, isActive: true },
   });
 
   if (!user) throw new Error("User not found");
+  if (!user.isActive) throw new Error("User is deactivated");
 
   // Create new tokens (both need await now!)
   const accessToken = await signAccessToken({

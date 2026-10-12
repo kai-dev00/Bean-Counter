@@ -2,18 +2,22 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth-guard";
 import { getCurrentUserWithName } from "@/lib/auth";
 import {
   createWithLog,
   updateWithLog,
   deleteWithLog,
 } from "@/lib/types/prismaLogger";
-import { PurchaseFormValues } from "./schema";
+import { PurchaseFormValues, purchaseSchema } from "./schema";
 import { Decimal } from "@prisma/client/runtime/client";
 import { realtime } from "@/lib/upstash/realtime";
 import { computeInventoryStatus } from "../utils";
 
 export async function createPurchase(values: PurchaseFormValues) {
+  await requirePermission("purchase:create");
+  values = purchaseSchema.parse(values);
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 
@@ -53,6 +57,9 @@ export async function createPurchase(values: PurchaseFormValues) {
 }
 
 export async function updatePurchase(id: string, values: PurchaseFormValues) {
+  await requirePermission("purchase:update");
+  values = purchaseSchema.parse(values);
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 
@@ -102,6 +109,8 @@ export async function updatePurchase(id: string, values: PurchaseFormValues) {
 }
 
 export async function receivePurchase(id: string) {
+  await requirePermission("purchase:update");
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 
@@ -161,6 +170,8 @@ export async function receivePurchase(id: string) {
 }
 
 export async function cancelPurchase(id: string) {
+  await requirePermission("purchase:update");
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 
@@ -193,6 +204,8 @@ export async function cancelPurchase(id: string) {
 }
 
 export async function deletePurchase(id: string) {
+  await requirePermission("purchase:delete");
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 

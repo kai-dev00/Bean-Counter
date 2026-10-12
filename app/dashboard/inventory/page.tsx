@@ -1,12 +1,15 @@
 import { getCurrentUserWithDetails } from "@/lib/auth";
 import InventoryClient from "./InventoryClient";
 import prisma from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function InventoryPage({
   searchParams,
 }: {
   searchParams: Promise<{ search?: string }>;
 }) {
+  await requirePermission("inventory:read");
+
   const { search } = await searchParams;
   const [rawInventories, categories, rawPurchaseHistory, permissionData] =
     await Promise.all([

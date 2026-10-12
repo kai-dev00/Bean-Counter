@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth-guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserWithName } from "@/lib/auth";
 import {
@@ -13,6 +14,8 @@ import { RoleFormValues, roleSchema } from "../schema";
 
 // Create Action
 export async function createRoleAction(data: RoleFormValues) {
+  await requirePermission("access-management:create:roles");
+
   const validated = roleSchema.parse(data);
 
   const existing = await prisma.role.findUnique({
@@ -57,6 +60,8 @@ export async function createRoleAction(data: RoleFormValues) {
 
 // Update Action
 export async function updateRoleAction(id: string, data: RoleFormValues) {
+  await requirePermission("access-management:update:roles");
+
   const validated = roleSchema.parse(data);
 
   const existing = await prisma.role.findFirst({
@@ -111,6 +116,8 @@ export async function updateRoleAction(id: string, data: RoleFormValues) {
 
 // Delete Action
 export async function deleteRoleAction(id: string) {
+  await requirePermission("access-management:delete:roles");
+
   const currentUser = await getCurrentUserWithName();
   const currentUserRoleId = currentUser?.roleId;
   const userId = currentUser?.userId ?? null;
@@ -162,6 +169,8 @@ export async function deleteRoleAction(id: string) {
 }
 
 export async function getRolesCount() {
+  await requirePermission("access-management:read:roles");
+
   return await prisma.role.findMany({
     include: {
       permissions: true,
@@ -174,6 +183,8 @@ export async function getRolesCount() {
 }
 
 export async function getRoleById(id: string) {
+  await requirePermission("access-management:read:roles");
+
   return await prisma.role.findUnique({
     where: { id },
     include: {
@@ -183,6 +194,8 @@ export async function getRoleById(id: string) {
 }
 
 export async function getAllPermissions() {
+  await requirePermission("access-management:read:roles");
+
   return await prisma.permission.findMany({
     orderBy: [{ module: "asc" }, { action: "asc" }],
   });

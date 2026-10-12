@@ -46,7 +46,7 @@ export default function InventoryTable({
   purchaseHistory,
 }: Props) {
   const { can } = usePermission(permissions);
-  if (!can("category:read")) return <NoPermission />;
+  if (!can("inventory:read")) return <NoPermission />;
   const [viewInventory, setViewInventory] =
     useState<InventoryWithCategory | null>(null);
   const [deleteUser, setDeleteUser] = useState<InventoryWithCategory | null>(

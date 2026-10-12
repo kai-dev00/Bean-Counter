@@ -1,9 +1,12 @@
 import prisma from "@/lib/prisma";
 import DashboardClient from "./_dashboard-components/dashboardClient";
+import { requirePermission } from "@/lib/auth-guard";
 
 const SPEND_MONTHS = 6;
 
 export default async function DashboardPage() {
+  await requirePermission("dashboard:read");
+
   const now = new Date();
   const spendStart = new Date(
     now.getFullYear(),

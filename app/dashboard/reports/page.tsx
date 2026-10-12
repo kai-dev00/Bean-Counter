@@ -2,8 +2,11 @@
 import prisma from "@/lib/prisma";
 import { getCurrentUserWithDetails } from "@/lib/auth";
 import ReportsClient from "./components/ReportClient";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function ReportsPage() {
+  await requirePermission("reports:read");
+
   const [rawInventories, rawPurchases, rawSupplierTotals, permissionData] =
     await Promise.all([
       prisma.inventory.findMany({

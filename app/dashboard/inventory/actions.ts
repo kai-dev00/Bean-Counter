@@ -1,23 +1,24 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth-guard";
 import { getCurrentUser, getCurrentUserWithName } from "@/lib/auth";
 import {
   createWithLog,
   deleteWithLog,
   updateWithLog,
 } from "@/lib/types/prismaLogger";
-import { InventoryFormValues } from "./InventoryClient";
+import { InventoryFormValues, inventorySchema } from "./schema";
 import { computeInventoryStatus } from "../utils";
 import { Decimal } from "@prisma/client/runtime/client";
 import { realtime } from "@/lib/upstash/realtime";
 
 //only use decimal in the action serve and numbers in the client
 
-export async function createInventory({
-  discontinued,
-  ...values
-}: InventoryFormValues) {
+export async function createInventory(input: InventoryFormValues) {
+  await requirePermission("inventory:create");
+  const { discontinued, ...values } = inventorySchema.parse(input);
+
   const status = computeInventoryStatus(
     values.quantity,
     values.minimumStock,
@@ -55,6 +56,9 @@ export async function createInventory({
 }
 
 export async function updateInventory(id: string, values: InventoryFormValues) {
+  await requirePermission("inventory:update");
+  values = inventorySchema.parse(values);
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
@@ -101,6 +105,8 @@ export async function updateInventory(id: string, values: InventoryFormValues) {
 }
 
 export async function deleteInventory(id: string) {
+  await requirePermission("inventory:delete");
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
 

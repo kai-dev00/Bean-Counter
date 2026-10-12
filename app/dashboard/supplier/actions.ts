@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth-guard";
 import { getCurrentUser, getCurrentUserWithName } from "@/lib/auth";
 import {
   createWithLog,
@@ -8,9 +9,12 @@ import {
   updateWithLog,
 } from "@/lib/types/prismaLogger";
 import { realtime } from "@/lib/upstash/realtime";
-import { SupplierFormValues } from "./SupplierClient";
+import { SupplierFormValues, supplierSchema } from "./schema";
 
 export async function createSupplier(values: SupplierFormValues) {
+  await requirePermission("supplier:create");
+  values = supplierSchema.parse(values);
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
@@ -44,6 +48,9 @@ export async function createSupplier(values: SupplierFormValues) {
 //update
 
 export async function updateSupplier(id: string, values: SupplierFormValues) {
+  await requirePermission("supplier:update");
+  values = supplierSchema.parse(values);
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
@@ -88,6 +95,8 @@ export async function updateSupplier(id: string, values: SupplierFormValues) {
 //delete
 
 export async function deleteSupplier(id: string) {
+  await requirePermission("supplier:delete");
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;

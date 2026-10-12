@@ -1,8 +1,11 @@
 import { getCurrentUserWithDetails } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import PurchaseClient from "./components/PurchaseClient";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function PurchasesPage() {
+  await requirePermission("purchase:read");
+
   const [rawPurchases, suppliers, rawInventories, permissionData] =
     await Promise.all([
       prisma.purchase.findMany({

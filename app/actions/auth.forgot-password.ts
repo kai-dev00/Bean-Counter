@@ -2,20 +2,38 @@
 
 import { sendResetPasswordEmail } from "@/lib/email";
 import prisma from "@/lib/prisma";
+import { checkForgotPasswordLimit } from "@/lib/upstash/ratelimit";
+import {
+  ActionResult,
+  firstIssue,
+  ForgotPasswordFormValues,
+  forgotPasswordSchema,
+} from "@/lib/validation/auth";
 import { randomBytes } from "crypto";
-import { ForgotPasswordFormValues } from "../(auth)/forgotPassword/page";
 
-export async function forgotPasswordAction(data: ForgotPasswordFormValues) {
-  const { email } = data;
+export async function forgotPasswordAction(
+  data: ForgotPasswordFormValues,
+): Promise<ActionResult> {
+  const parsed = forgotPasswordSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false, error: firstIssue(parsed.error) };
+  }
+  const { email } = parsed.data;
 
-  // export async function forgotPasswordAction(email: string) {
+  if (!(await checkForgotPasswordLimit(email))) {
+    return {
+      success: false,
+      error: "Too many requests. Please try again later.",
+    };
+  }
+
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
-  // Security: don't reveal if user exists
+  // Security: same response whether or not the user exists
   if (!user) {
-    return;
+    return { success: true };
   }
   const token = randomBytes(32).toString("hex");
 
@@ -28,4 +46,5 @@ export async function forgotPasswordAction(data: ForgotPasswordFormValues) {
   });
 
   await sendResetPasswordEmail(user.email, token);
+  return { success: true };
 }

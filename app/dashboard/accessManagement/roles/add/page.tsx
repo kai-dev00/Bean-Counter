@@ -1,7 +1,10 @@
 import { getAllPermissions } from "../../actions/roles";
 import { RoleForm } from "../../components/RolesManagementForm";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function AddRolePage() {
+  await requirePermission("access-management:create:roles");
+
   const permissions = await getAllPermissions();
 
   return (

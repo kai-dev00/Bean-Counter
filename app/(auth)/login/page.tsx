@@ -6,16 +6,9 @@ import { JSX, useState } from "react";
 import { CustomInput } from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-
-const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-export type LoginFormValues = z.infer<typeof loginSchema>;
+import { LoginFormValues, loginSchema } from "@/lib/validation/auth";
 
 export default function LoginForm(): JSX.Element {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -37,11 +30,13 @@ export default function LoginForm(): JSX.Element {
     setServerError(null);
     try {
       const result = await loginAction(values);
-      if (result?.success) {
+      if (result.success) {
         router.push("/dashboard");
+      } else {
+        setServerError(result.error);
       }
-    } catch (err: any) {
-      setServerError(err.message || "Login failed");
+    } catch {
+      setServerError("Login failed. Please try again.");
     }
   };
 

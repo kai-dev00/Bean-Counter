@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { CategoryFormValues } from "./CategoryClient";
+import { requirePermission } from "@/lib/auth-guard";
+import { CategoryFormValues, categorySchema } from "./schema";
 import { getCurrentUser, getCurrentUserWithName } from "@/lib/auth";
 import {
   createWithLog,
@@ -11,6 +12,9 @@ import {
 import { realtime } from "@/lib/upstash/realtime";
 
 export async function createCategory(values: CategoryFormValues) {
+  await requirePermission("category:create");
+  values = categorySchema.parse(values);
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
@@ -41,6 +45,9 @@ export async function createCategory(values: CategoryFormValues) {
 }
 
 export async function updateCategory(id: string, values: CategoryFormValues) {
+  await requirePermission("category:update");
+  values = categorySchema.parse(values);
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
@@ -82,6 +89,8 @@ export async function updateCategory(id: string, values: CategoryFormValues) {
 }
 
 export async function deleteCategory(id: string) {
+  await requirePermission("category:delete");
+
   // const currentUser = await getCurrentUser();
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;

@@ -99,14 +99,14 @@ There are two ways permissions get checked:
 
 | Mechanism | Where | Effect |
 |---|---|---|
-| `requirePermission(p)` (server) | **Only** `inviteUserAction` | Redirects to `/dashboard/no-permission` if missing. Actually enforced |
-| `usePermission(perms).can(p)` (client) | Every `*Client.tsx` / table | Hides pages and buttons. **Not a security boundary** |
+| `requirePermission(p)` (server) | Top of **every** dashboard server action, read helper and `page.tsx` | Redirects to `/dashboard/no-permission` if missing. This is the real security boundary. The lookup is cached per request (`getPermissionStrings`) |
+| `usePermission(perms).can(p)` (client) | Every `*Client.tsx` / table, and the sidebar | Hides pages, buttons and nav links. UI only, **not a security boundary** |
 
 ## Protected routes
 
 - `proxy.ts` matcher: `/dashboard/:path*`, `/login`.
-- **Not covered:** `/api/*` (including `/api/realtime` and `/api/test-edit-user`), and the auth pages (public on purpose).
-- Server actions are POST requests to the page that renders them. Those under `/dashboard` go through the proxy, so an **unauthenticated** caller gets redirected. An authenticated user without the right permission is **not** blocked (see findings).
+- **Not covered:** `/api/*` and the auth pages (public on purpose). `/api/realtime` checks the session cookie itself (valid access or refresh token, active user).
+- Server actions are POST requests to the page that renders them. Those under `/dashboard` go through the proxy, so an **unauthenticated** caller gets redirected. Each action then calls `requirePermission`, so an authenticated user without the permission is redirected to `/dashboard/no-permission`.
 
 ## Secret handling
 
@@ -117,27 +117,34 @@ There are two ways permissions get checked:
 
 ## Rate limiting
 
-**None.** Login, forgot-password and the token endpoints have no attempt limits or lockout. Upstash Redis is already a dependency, so `@upstash/ratelimit` would be a natural fit.
+[`lib/upstash/ratelimit.ts`](../lib/upstash/ratelimit.ts) uses `@upstash/ratelimit` (sliding window) on the existing Upstash Redis:
+
+| Endpoint | Per IP | Per email |
+|---|---|---|
+| Login | 20 / minute | 10 / 15 min, reset after a successful login |
+| Forgot password | 10 / hour | 3 / hour |
+
+If Redis is unreachable, the check **fails open** (logs and allows), so an Upstash outage doesn't lock everyone out. The token endpoints (`/api/auth/refresh`, reset/register by token) aren't limited; their tokens are 32 random bytes or signed JWTs.
 
 ## Security findings
 
 Found by reading the code. Ordered by severity.
 
-| # | Severity | Finding | Location | Suggested fix |
-|---|---|---|---|---|
-| 1 | 🔴 High | **Missing server-side authorization.** Every inventory, category, supplier, purchase and role action, plus `editUserAction` and `deleteAccessAction`, runs for any logged-in user regardless of role. Only the UI hides the buttons. | `app/dashboard/*/actions.ts`, `accessManagement/actions/*.ts` | Call `await requirePermission("<module>:<action>")` at the top of every action |
-| 2 | 🔴 High | **Debug route in production code.** `/api/test-edit-user` is public (outside the proxy matcher) and calls `editUserAction`. It uses dummy IDs today, but it shouldn't exist. | `app/api/test-edit-user/route.ts` | Delete it |
-| 3 | 🟠 Medium | **Data sent before the permission check.** Pages query all data on the server and the client decides whether to show it, so restricted data is still in the RSC payload. The role add/edit pages and the dashboard home have no check at all. | `app/dashboard/**/page.tsx` | Call `requirePermission` in each `page.tsx` before querying |
-| 4 | 🟠 Medium | **Logout revokes everyone's sessions.** `session.updateMany({ where: { revoked: false } })` has no user filter, so one logout ends every user's refresh session. | `app/actions/auth.logout.ts` | Revoke only the session matching the current refresh token (or `userId`) |
-| 5 | 🟠 Medium | **Deactivated users can still log in.** `loginAction` and `refreshAction` don't check `User.isActive`, so the "Active" toggle doesn't block access. | `auth.login.ts`, `auth.refresh.ts` | Reject when `!user.isActive` |
-| 6 | 🟠 Medium | **No rate limiting** on login or forgot-password (brute force, email flooding). | auth actions | Add rate limits |
-| 7 | 🟡 Low | **Open redirect risk.** `returnTo` is passed to `new URL(returnTo, request.url)`, so an absolute URL would redirect off-site. | `app/api/auth/refresh/route.ts` | Only accept paths starting with a single `/` |
-| 8 | 🟡 Low | **Realtime stream is unauthenticated.** `/api/realtime` isn't behind the proxy, so anyone who can reach it may be able to subscribe to activity events (user names, modules, record IDs). | `app/api/realtime/route.ts` | Add `/api/realtime` to the proxy matcher or check the cookie in the handler |
-| 9 | 🟡 Low | **Little server-side input validation.** Only role actions re-validate with Zod. | actions | `schema.parse(values)` in every action |
-| 10 | 🟡 Low | **Reset and invite tokens are stored in plain text.** Anyone with DB read access could use pending tokens. | `PasswordReset.token`, `UserInvite.token` | Store a SHA-256 hash and compare hashes |
-| 11 | 🟡 Low | **Inconsistent password policy:** 6 characters at registration, 8 on reset/change. No complexity rules. | register/reset/profile forms | One shared schema, enforced on the server too |
-| 12 | ℹ️ Info | Auth cookies have no `maxAge`, so they're **browser-session cookies**. The 7-day refresh lifetime only applies while the browser stays open. | `lib/cookies.ts` | Set `maxAge` if "remember me" is wanted |
-| 13 | ℹ️ Info | Access tokens stay valid for up to 15 minutes after a role change, deactivation or deletion (the proxy checks only the JWT signature). | `proxy.ts` | Acceptable trade-off, or shorten the TTL |
-| 14 | ℹ️ Info | `verifyAccessToken` returns a `permissions` claim that's never set (leftover from an earlier design). | `lib/jwt.ts` | Remove it |
+| # | Severity | Finding | Location | Suggested fix | Status |
+|---|---|---|---|---|---|
+| 1 | 🔴 High | **Missing server-side authorization.** Every inventory, category, supplier, purchase and role action, plus `editUserAction` and `deleteAccessAction`, runs for any logged-in user regardless of role. Only the UI hides the buttons. | `app/dashboard/*/actions.ts`, `accessManagement/actions/*.ts` | Call `await requirePermission("<module>:<action>")` at the top of every action | ✅ Fixed |
+| 2 | 🔴 High | **Debug route in production code.** `/api/test-edit-user` is public (outside the proxy matcher) and calls `editUserAction`. It uses dummy IDs today, but it shouldn't exist. | `app/api/test-edit-user/route.ts` | Delete it | ✅ Fixed |
+| 3 | 🟠 Medium | **Data sent before the permission check.** Pages query all data on the server and the client decides whether to show it, so restricted data is still in the RSC payload. The role add/edit pages and the dashboard home have no check at all. | `app/dashboard/**/page.tsx` | Call `requirePermission` in each `page.tsx` before querying | ✅ Fixed |
+| 4 | 🟠 Medium | **Logout revokes everyone's sessions.** `session.updateMany({ where: { revoked: false } })` has no user filter, so one logout ends every user's refresh session. | `app/actions/auth.logout.ts` | Revoke only the session matching the current refresh token (or `userId`) | ✅ Fixed |
+| 5 | 🟠 Medium | **Deactivated users can still log in.** `loginAction` and `refreshAction` don't check `User.isActive`, so the "Active" toggle doesn't block access. | `auth.login.ts`, `auth.refresh.ts` | Reject when `!user.isActive` | ✅ Fixed |
+| 6 | 🟠 Medium | **No rate limiting** on login or forgot-password (brute force, email flooding). | auth actions | Add rate limits | ✅ Fixed |
+| 7 | 🟡 Low | **Open redirect risk.** `returnTo` is passed to `new URL(returnTo, request.url)`, so an absolute URL would redirect off-site. | `app/api/auth/refresh/route.ts` | Only accept paths starting with a single `/` | ✅ Fixed |
+| 8 | 🟡 Low | **Realtime stream is unauthenticated.** `/api/realtime` isn't behind the proxy, so anyone who can reach it may be able to subscribe to activity events (user names, modules, record IDs). | `app/api/realtime/route.ts` | Add `/api/realtime` to the proxy matcher or check the cookie in the handler | ✅ Fixed |
+| 9 | 🟡 Low | **Little server-side input validation.** Only role actions re-validate with Zod. | actions | `schema.parse(values)` in every action | ✅ Fixed |
+| 10 | 🟡 Low | **Reset and invite tokens are stored in plain text.** Anyone with DB read access could use pending tokens. | `PasswordReset.token`, `UserInvite.token` | Store a SHA-256 hash and compare hashes | Open |
+| 11 | 🟡 Low | **Inconsistent password policy:** 6 characters at registration, 8 on reset/change. No complexity rules. | register/reset/profile forms | One shared schema, enforced on the server too | ✅ Fixed (8–72 characters, `lib/validation/auth.ts`) |
+| 12 | ℹ️ Info | Auth cookies have no `maxAge`, so they're **browser-session cookies**. The 7-day refresh lifetime only applies while the browser stays open. | `lib/cookies.ts` | Set `maxAge` if "remember me" is wanted | Open |
+| 13 | ℹ️ Info | Access tokens stay valid for up to 15 minutes after a role change, deactivation or deletion (the proxy checks only the JWT signature). | `proxy.ts` | Acceptable trade-off, or shorten the TTL | Open (accepted) |
+| 14 | ℹ️ Info | `verifyAccessToken` returns a `permissions` claim that's never set (leftover from an earlier design). | `lib/jwt.ts` | Remove it | Open |
 
 CSRF: cookies are `SameSite=Lax`, and Next.js server actions check the `Origin` header, which covers the usual CSRF cases for POST actions.

@@ -6,6 +6,11 @@ import { useState } from "react";
 import { CustomInput } from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import { showToast } from "@/lib/toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ChangePasswordFormValues as ChangePasswordForm,
+  changePasswordSchema,
+} from "@/lib/validation/auth";
 
 export type UserProps = {
   id: string;
@@ -21,11 +26,6 @@ type Props = {
   user: UserProps;
 };
 
-type ChangePasswordForm = {
-  currentPassword: string;
-  newPassword: string;
-};
-
 export default function ProfileClient({ user }: Props) {
   const {
     register,
@@ -33,6 +33,7 @@ export default function ProfileClient({ user }: Props) {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -47,19 +48,21 @@ export default function ProfileClient({ user }: Props) {
     setSuccess(false);
 
     try {
-      await changePasswordAction(data.currentPassword, data.newPassword);
+      const result = await changePasswordAction(data);
+      if (!result.success) {
+        showToast.error("Something went wrong", result.error);
+        setError(result.error);
+        return;
+      }
       setSuccess(true);
       showToast.success(
         "Password updated",
         "Your password has been updated successfully.",
       );
       reset();
-    } catch (err: any) {
-      showToast.error(
-        "Something went wrong",
-        err?.message ?? "Failed to update password.",
-      );
-      setError(err?.message ?? "Something went wrong");
+    } catch {
+      showToast.error("Something went wrong", "Failed to update password.");
+      setError("Something went wrong");
     }
   }
 
@@ -121,9 +124,7 @@ export default function ProfileClient({ user }: Props) {
             autoComplete="current-password"
             required
             error={errors.currentPassword?.message}
-            {...register("currentPassword", {
-              required: "Current password is required",
-            })}
+            {...register("currentPassword")}
           />
 
           <CustomInput
@@ -132,13 +133,7 @@ export default function ProfileClient({ user }: Props) {
             autoComplete="new-password"
             required
             error={errors.newPassword?.message}
-            {...register("newPassword", {
-              required: "New password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-            })}
+            {...register("newPassword")}
           />
 
           <CustomButton type="submit" loading={isSubmitting}>

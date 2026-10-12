@@ -62,7 +62,7 @@ This happens with `CustomButton asChild` (Radix `Slot`) when it receives more th
 
 ### Deactivated user can still log in
 
-Known issue: `isActive` isn't checked at login ([07 #5](./07-auth-and-security.md#security-findings)).
+Deactivated users (`isActive = false`) are rejected at login and on token refresh, and lose the realtime feed.
 
 ### `/dashboard/accessManagement` shows 404
 

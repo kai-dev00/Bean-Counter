@@ -1,4 +1,5 @@
 import { getCurrentUserWithDetails } from "@/lib/auth";
+import { getPermissionStrings } from "@/lib/auth-guard";
 import { AuthProvider } from "../(auth)/AuthProvider";
 import DashboardLayoutWrapper from "./layout-wrapper";
 
@@ -7,12 +8,16 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUserWithDetails();
+  const [user, permissions] = await Promise.all([
+    getCurrentUserWithDetails(),
+    getPermissionStrings(),
+  ]);
   const sidebarUser = user
     ? {
         fullName: user.fullName ?? null,
         email: user.email ?? "",
         role: user.role?.name ?? "USER",
+        permissions: permissions ?? [],
       }
     : null;
 

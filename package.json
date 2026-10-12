@@ -19,6 +19,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
     "@types/jsonwebtoken": "^9.0.10",
+    "@upstash/ratelimit": "^2.2.0",
     "@upstash/realtime": "^1.0.3",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",

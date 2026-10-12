@@ -1,6 +1,7 @@
 import AccessManagementClient from "../components/AccessManagementClient";
 import { getCurrentUserWithDetails } from "@/lib/auth";
 import { getInvites, getRoles, getUsers } from "../actions/users";
+import { requirePermission } from "@/lib/auth-guard";
 
 export type UserRow = {
   id: string;
@@ -29,6 +30,8 @@ export default async function AccessManagement({
 }: {
   searchParams: Promise<{ search?: string }>;
 }) {
+  await requirePermission("access-management:read:users");
+
   const { search } = await searchParams;
   const permissionData = await getCurrentUserWithDetails();
   const permissions = permissionData?.role?.permissions || [];

@@ -1,8 +1,11 @@
 import { getCurrentUserWithDetails } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import SupplierClient from "./SupplierClient";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function SupplierPage() {
+  await requirePermission("supplier:read");
+
   const suppliers = await prisma.supplier.findMany({
     orderBy: { updatedAt: "desc" },
   });

@@ -4,31 +4,15 @@ import { Permission } from "@/lib/types";
 import { PageCard } from "@/components/PageCard";
 import NoPermission from "../no-permission";
 import { usePermission } from "@/lib/permissions/usePermission";
-import {
-  Category,
-  InventoryUnit,
-  Prisma,
-} from "@/app/generated/prisma/browser";
+import { Category, Prisma } from "@/app/generated/prisma/browser";
 import CustomButton from "@/components/CustomButton";
 import InventoryTable from "./components/inventoryTable";
 import { useState } from "react";
 import { CustomModal } from "@/components/CustomModal";
 import InventoryForm from "./components/inventoryForm";
-import z from "zod";
 import { AlertTriangle, Package, XCircle } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
-
-export const inventorySchema = z.object({
-  name: z.string().min(1, "Required").max(50),
-  description: z.string().optional(),
-  quantity: z.number({ message: "Required" }).min(0, "Required"),
-  minimumStock: z.number({ message: "Required" }).min(0, "Required"),
-  unitPrice: z.number({ message: "Required" }).min(0, "Required"),
-  unit: z.nativeEnum(InventoryUnit),
-  categoryId: z.string().min(1, "Required"),
-  discontinued: z.boolean(),
-});
-export type InventoryFormValues = z.infer<typeof inventorySchema>;
+import { InventoryFormValues } from "./schema";
 
 export type InventoryCreatePayload = Omit<
   InventoryFormValues,
