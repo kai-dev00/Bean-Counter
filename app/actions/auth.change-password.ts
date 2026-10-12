@@ -3,15 +3,26 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { getCurrentUser } from "@/lib/auth";
+import {
+  ActionResult,
+  ChangePasswordFormValues,
+  changePasswordSchema,
+  firstIssue,
+} from "@/lib/validation/auth";
 
 export async function changePasswordAction(
-  currentPassword: string,
-  newPassword: string,
-) {
+  data: ChangePasswordFormValues,
+): Promise<ActionResult> {
+  const parsed = changePasswordSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false, error: firstIssue(parsed.error) };
+  }
+  const { currentPassword, newPassword } = parsed.data;
+
   const sessionUser = await getCurrentUser();
 
   if (!sessionUser) {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Unauthorized" };
   }
 
   const user = await prisma.user.findUnique({
@@ -19,13 +30,13 @@ export async function changePasswordAction(
   });
 
   if (!user) {
-    throw new Error("User not found");
+    return { success: false, error: "User not found" };
   }
 
   const isValid = await bcrypt.compare(currentPassword, user.password);
 
   if (!isValid) {
-    throw new Error("Current password is incorrect");
+    return { success: false, error: "Current password is incorrect" };
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -45,4 +56,6 @@ export async function changePasswordAction(
       data: { revoked: true },
     }),
   ]);
+
+  return { success: true };
 }

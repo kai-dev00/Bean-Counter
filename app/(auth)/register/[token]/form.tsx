@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@/components/CustomButton";
 import { CustomInput } from "@/components/CustomInput";
@@ -10,22 +9,7 @@ import { registerUserAction } from "@/app/actions/auth.register";
 import { useState } from "react";
 import { showToast } from "@/lib/toast";
 import { CustomModal } from "@/components/CustomModal";
-
-const registerSchema = z
-  .object({
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-    phoneNumber: z
-      .string()
-      .min(1, "Phone number is required")
-      .regex(/^\+?[0-9]{10,15}$/, "Invalid phone number format"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { RegisterFormValues, registerSchema } from "@/lib/validation/auth";
 
 type Props = {
   token: string;
@@ -57,17 +41,18 @@ export default function RegisterForm({ token, inviteData }: Props) {
     // router.push("/login");
 
     try {
-      await registerUserAction({
+      const result = await registerUserAction({
         token,
         password: data.password,
         phoneNumber: data.phoneNumber,
       });
+      if (!result.success) {
+        showToast.error("Something went wrong", result.error);
+        return;
+      }
       setShowSuccessModal(true);
-    } catch (error: any) {
-      showToast.error(
-        "Something went wrong",
-        error?.message ?? "Please try again",
-      );
+    } catch {
+      showToast.error("Something went wrong", "Please try again");
     }
   }
 

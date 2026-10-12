@@ -26,9 +26,7 @@ There is no REST/GraphQL API for third parties.
 |---|---|---|---|---|---|---|
 | `GET` | `/api/auth/refresh` | Rotate the refresh session and issue new tokens, then go back to the page the user was on | Needs a valid `refresh_token` cookie | Query: `returnTo` (default `/dashboard`) | `307` redirect to `returnTo` on success, or to `/login` on any error | [`app/api/auth/refresh/route.ts`](../app/api/auth/refresh/route.ts) |
 | `GET` | `/api/realtime` | Upstash Realtime stream (SSE) for the activity feed | ⚠️ None: `/api` isn't covered by `proxy.ts` | Managed by `@upstash/realtime` client | Event stream | [`app/api/realtime/route.ts`](../app/api/realtime/route.ts) |
-| `GET` | `/api/test-edit-user` | ⚠️ **Debug leftover.** Calls `editUserAction` with hard-coded dummy IDs to test authorization | None | none | `200` JSON if the edit succeeded, `403` JSON `{ message, error }` if it threw | [`app/api/test-edit-user/route.ts`](../app/api/test-edit-user/route.ts) |
 
-> ⚠️ Remove `/api/test-edit-user` before deploying (see [07](./07-auth-and-security.md#security-findings)).
 
 ## Server actions
 
@@ -39,7 +37,7 @@ Server actions are called like functions from client components. They signal err
 | Action | File | Purpose | Input | Returns / side effects | Errors thrown |
 |---|---|---|---|---|---|
 | `loginAction` | [`auth.login.ts`](../app/actions/auth.login.ts) | Check credentials, create a session, set cookies | `{ email, password }` | Creates a `Session` (bcrypt hash of the refresh token, 7-day expiry), sets the `access_token` + `refresh_token` cookies, returns `{ success: true }` | `Invalid form data`, `Invalid email or password` |
-| `logoutAction` | [`auth.logout.ts`](../app/actions/auth.logout.ts) | Revoke sessions, clear cookies | none (used as a `<form action>`) | Redirects to `/login`. ⚠️ Revokes **all** non-revoked sessions in the table, not just the caller's | none |
+| `logoutAction` | [`auth.logout.ts`](../app/actions/auth.logout.ts) | Revoke the caller's session, clear cookies | none (used as a `<form action>`) | Redirects to `/login`. Only the session matching this browser's refresh token is revoked | none |
 | `refreshAction` | [`auth.refresh.ts`](../app/actions/auth.refresh.ts) | Rotate tokens (used by `/api/auth/refresh`) | none (reads cookie) | Revokes the matched session, creates a new one, sets new cookies | `No refresh token`, `Invalid session`, `User not found`, or a JWT verification error |
 | `registerUserAction` | [`auth.register.ts`](../app/actions/auth.register.ts) | Accept an invite and create the account | `{ token, password, phoneNumber }` | In one transaction: create the `User` (active, email verified) and delete the `UserInvite` | `Invalid token`, `Token expired`, `User already registered` |
 | `forgotPasswordAction` | [`auth.forgot-password.ts`](../app/actions/auth.forgot-password.ts) | Start a password reset | `{ email }` | If the user exists: creates a `PasswordReset` (32-byte hex token, 30-minute expiry) and emails the link. Returns silently either way, so it doesn't reveal which emails exist | none |
@@ -163,7 +161,7 @@ stateDiagram-v2
 | Gmail SMTP (Nodemailer) | Invite and reset emails. Templates in [`lib/email/templates/`](../lib/email/templates) | `GMAIL_USER`, `GMAIL_PASS`, `SMTP_USER`, `NEXT_PUBLIC_APP_URL` |
 
 > ⚠️ **Gaps / TODO**
-> - Add `requirePermission(...)` to every mutating action (see [07](./07-auth-and-security.md#security-findings)).
+> - Every action calls `requirePermission(...)` first, then validates its input with the module's Zod schema.
 > - Re-validate inputs on the server with the same Zod schemas.
 > - Wrap multi-step writes (purchase update and receive, plus the audit log insert) in `prisma.$transaction`.
 > - The email transport sets `service: "gmail"` together with `port: 465, secure: false`. Nodemailer's `service` preset overrides host and port, but the settings contradict each other.

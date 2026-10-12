@@ -1,12 +1,15 @@
 import prisma from "@/lib/prisma";
 import CategoryClient from "./CategoryClient";
 import { getCurrentUserWithDetails } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function CategoriesPage({
   searchParams,
 }: {
   searchParams: Promise<{ search?: string }>;
 }) {
+  await requirePermission("category:read");
+
   const { search } = await searchParams;
   const categories = await prisma.category.findMany({
     orderBy: { updatedAt: "desc" },

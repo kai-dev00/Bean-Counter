@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { createCategory, updateCategory } from "../actions";
 import { CustomInput } from "@/components/CustomInput";
-import { CategoryFormValues, categorySchema } from "../CategoryClient";
+import { CategoryFormValues, categorySchema } from "../schema";
 
 type CategoryFormProps = {
   category: Category | null;

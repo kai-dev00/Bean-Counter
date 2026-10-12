@@ -1,27 +1,33 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import {
+  ActionResult,
+  firstIssue,
+  RegisterInput,
+  registerInputSchema,
+} from "@/lib/validation/auth";
 import bcrypt from "bcryptjs";
 
-type RegisterInput = {
-  token: string;
-  password: string;
-  phoneNumber: string;
-};
-
-export async function registerUserAction(data: RegisterInput) {
-  const { token, password, phoneNumber } = data;
+export async function registerUserAction(
+  data: RegisterInput,
+): Promise<ActionResult> {
+  const parsed = registerInputSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false, error: firstIssue(parsed.error) };
+  }
+  const { token, password, phoneNumber } = parsed.data;
 
   const invite = await prisma.userInvite.findUnique({
     where: { token },
   });
 
   if (!invite) {
-    throw new Error("Invalid token");
+    return { success: false, error: "Invalid token" };
   }
 
   if (invite.expiresAt < new Date()) {
-    throw new Error("Token expired");
+    return { success: false, error: "Token expired" };
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -29,7 +35,7 @@ export async function registerUserAction(data: RegisterInput) {
   });
 
   if (existingUser) {
-    throw new Error("User already registered");
+    return { success: false, error: "User already registered" };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -52,4 +58,6 @@ export async function registerUserAction(data: RegisterInput) {
       where: { token },
     }),
   ]);
+
+  return { success: true };
 }

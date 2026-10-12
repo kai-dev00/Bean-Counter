@@ -8,17 +8,8 @@ import { CustomModal } from "@/components/CustomModal";
 import NoPermission from "../no-permission";
 import CategoryTable from "./components/categoryTable";
 import CategoryForm from "./components/categoryForm";
-import { z } from "zod";
 import { Permission } from "@/lib/types";
 import { usePermission } from "@/lib/permissions/usePermission";
-
-export const categorySchema = z.object({
-  name: z.string().min(1, "Category name is required").max(50),
-  description: z.string().optional(),
-  icon: z.string().max(5).optional(),
-  color: z.string().optional(),
-});
-export type CategoryFormValues = z.infer<typeof categorySchema>;
 
 type Props = {
   categories: Category[];

@@ -12,7 +12,7 @@ What exists today:
 | Linting | `npm run lint` | ESLint (`next/core-web-vitals` + TypeScript rules). ⚠️ There are existing errors, e.g. hooks called conditionally in several `*Client.tsx` / table components, and `no-explicit-any` |
 | Manual testing | `npm run dev` | Everything else |
 
-The only test-like artifact is [`app/api/test-edit-user/route.ts`](../app/api/test-edit-user/route.ts), a manual check that `editUserAction` rejects unauthorized edits. It isn't a real test, and it **should be deleted** (see [07](./07-auth-and-security.md#security-findings)).
+There are no test-like artifacts left (the old `/api/test-edit-user` debug route was deleted).
 
 ## Suggested setup
 
@@ -65,7 +65,7 @@ To run something like this you'd need to `npm i -D vitest` and add a `vitest.con
 | Priority | Area | Why it matters | Code |
 |---|---|---|---|
 | 1 | **Permission enforcement in server actions** | Most actions don't check permissions today. Tests would catch this and stop it coming back | `app/dashboard/*/actions.ts` |
-| 2 | **Auth flows:** login, refresh rotation, logout, inactive users | Security-critical. Logout currently revokes every user's sessions | `app/actions/auth.*.ts`, `proxy.ts` |
+| 2 | **Auth flows:** login, refresh rotation, logout, inactive users, rate limits | Security-critical, and recently changed | `app/actions/auth.*.ts`, `proxy.ts`, `lib/upstash/ratelimit.ts` |
 | 3 | **Purchase lifecycle** | Receiving changes stock and status, there's no transaction, and DRAFT-only rules | `app/dashboard/purchase/actions.ts` |
 | 4 | **Inventory status calculation** | Drives restock alerts, dashboard counts and filters | `computeInventoryStatus` |
 | 5 | **Invite and password reset** | Token expiry and single use | `actions/users.ts`, `auth.register.ts`, `auth.reset-password.ts` |

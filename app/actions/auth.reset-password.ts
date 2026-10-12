@@ -1,15 +1,22 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import {
+  ActionResult,
+  firstIssue,
+  ResetPasswordInput,
+  resetPasswordInputSchema,
+} from "@/lib/validation/auth";
 import bcrypt from "bcryptjs";
 
-type ResetPasswordInput = {
-  token: string;
-  password: string;
-};
-
-export async function resetPasswordAction(data: ResetPasswordInput) {
-  const { token, password } = data;
+export async function resetPasswordAction(
+  data: ResetPasswordInput,
+): Promise<ActionResult> {
+  const parsed = resetPasswordInputSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false, error: firstIssue(parsed.error) };
+  }
+  const { token, password } = parsed.data;
 
   const reset = await prisma.passwordReset.findUnique({
     where: { token },
@@ -17,15 +24,15 @@ export async function resetPasswordAction(data: ResetPasswordInput) {
   });
 
   if (!reset) {
-    throw new Error("Invalid token");
+    return { success: false, error: "Invalid token" };
   }
 
   if (reset.usedAt) {
-    throw new Error("Token already used");
+    return { success: false, error: "Token already used" };
   }
 
   if (reset.expiresAt < new Date()) {
-    throw new Error("Token expired");
+    return { success: false, error: "Token expired" };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -40,4 +47,6 @@ export async function resetPasswordAction(data: ResetPasswordInput) {
       data: { usedAt: new Date() },
     }),
   ]);
+
+  return { success: true };
 }

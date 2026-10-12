@@ -21,11 +21,13 @@ type SidebarUser = {
   fullName: string | null;
   email: string;
   role: string;
+  permissions: string[];
 };
 
 type NavSubItem = {
   label: string;
   href: string;
+  permission?: string;
 };
 
 type NavItem = {
@@ -83,15 +85,16 @@ const navItems: NavItem[] = [
   {
     label: "Access Management",
     icon: MdManageAccounts,
-    permission: "access-management:read",
     subItems: [
       {
         label: "User Management",
         href: "/dashboard/accessManagement/users",
+        permission: "access-management:read:users",
       },
       {
         label: "Role Management",
         href: "/dashboard/accessManagement/roles",
+        permission: "access-management:read:roles",
       },
     ],
   },
@@ -133,6 +136,23 @@ export default function DashboardSidebar({
 
   const isExpanded = !isCollapsed || isHovered;
 
+  // Hide links the user can't open. Pages also enforce this on the server
+  const permissions = user?.permissions ?? [];
+  const allowed = (permission?: string) =>
+    !permission || permissions.includes(permission);
+  const visibleNavItems = navItems
+    .map((item) =>
+      item.subItems
+        ? {
+            ...item,
+            subItems: item.subItems.filter((sub) => allowed(sub.permission)),
+          }
+        : item,
+    )
+    .filter((item) =>
+      item.subItems ? item.subItems.length > 0 : allowed(item.permission),
+    );
+
   return (
     <aside
       onMouseEnter={() => isCollapsed && setIsHovered(true)}
@@ -156,7 +176,7 @@ export default function DashboardSidebar({
 
       {/* Navigation */}
       <nav className="space-y-2">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = isParentActive(item);
           const hasSubItems = item.subItems && item.subItems.length > 0;

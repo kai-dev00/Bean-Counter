@@ -23,18 +23,12 @@ The team keeps a personal notes file instead: [`todo's.ts`](../todo's.ts). It's 
 
 | Bug | Impact | Location |
 |---|---|---|
-| Most server actions skip server-side permission checks | Any logged-in user can create, edit or delete anything | `app/dashboard/*/actions.ts`, `accessManagement/actions/*.ts`. See [07](./07-auth-and-security.md#security-findings) |
-| `logoutAction` revokes every user's sessions | Everyone gets logged out when access tokens expire | `app/actions/auth.logout.ts` |
-| `isActive` not checked at login or refresh | Deactivating a user doesn't block them | `auth.login.ts`, `auth.refresh.ts` |
-| Debug route `/api/test-edit-user` | Public endpoint that calls a privileged action | `app/api/test-edit-user/route.ts` |
 | MODERATOR seed uses wrong module names | The role gets no category or users/roles permissions | `prisma/data/roles.json` |
-| `/dashboard/accessManagement` redirects to a non-existent path | 404 | `app/dashboard/accessManagement/page.tsx` |
 | `revalidatePath("/roles")` uses the wrong path | Does nothing (pages refresh via `router.refresh()` anyway) | `accessManagement/actions/roles.ts` |
 | Multi-step writes aren't transactional | Partial updates possible in `updatePurchase` / `receivePurchase`. Audit log rows can go missing | `purchase/actions.ts`, `lib/types/prismaLogger.ts` |
 | `realtime.emit` failure fails the action after the DB write | Saved data reported as an error | all actions |
 | Deleting an inventory, category or supplier that has purchases | Generic error (FK violation) | see [11](./11-troubleshooting.md#delete-fails-with-a-foreign-key-error-prisma-p2003) |
 | Hooks called after an early `return <NoPermission />` | Lint errors (`react-hooks/rules-of-hooks`). Can crash if permissions change between renders | `AccessManagementClient.tsx`, `PurchaseClient.tsx`, `inventoryTable.tsx`, and others |
-| `inventoryTable.tsx` checks `can("category:read")` instead of `inventory:read` | Wrong permission gate on the inventory table | `app/dashboard/inventory/components/inventoryTable.tsx` |
 | Type errors in role pages | `tsc` fails (`Permission.description` nullability) | `RolesManagementForm.tsx` |
 
 ## Known limitations
@@ -43,8 +37,6 @@ The team keeps a personal notes file instead: [`todo's.ts`](../todo's.ts). It's 
 - **Spend is grouped by purchase `createdAt`.** There's no `receivedAt` field.
 - **Hardcoded trends** on the Inventory page stats cards ("▼5% from last week", "▲2%") aren't based on data (`InventoryClient.tsx`).
 - **Everything loads at once.** Pages fetch every row and `DataTable` paginates in the browser, which will slow down as data grows.
-- **Sidebar shows every link to every user.** The `permission` field on nav items isn't used.
-- **`dashboard:read` permission is never checked.**
 - **`Session` and `PasswordReset` rows are never cleaned up.**
 - **Single currency (₱) and English only.**
 - **No automated tests, CI or deployment config** (see [08](./08-testing.md), [09](./09-deployment.md)).
@@ -52,10 +44,10 @@ The team keeps a personal notes file instead: [`todo's.ts`](../todo's.ts). It's 
 
 ## Suggested improvements (priority order)
 
-1. **Enforce permissions on the server:** `requirePermission` in every action and every `page.tsx`, and filter the sidebar by permission.
-2. **Fix the auth bugs:** per-user logout, the `isActive` check, `returnTo` validation, delete `/api/test-edit-user`, and protect `/api/realtime`.
-3. **Add rate limiting** to login and forgot-password (Upstash Ratelimit).
-4. **Validate on the server** with the existing Zod schemas. Unify the password policy.
+1. ~~**Enforce permissions on the server**~~ ✅ Done: `requirePermission` in every action, read helper and `page.tsx`; sidebar filtered by permission.
+2. ~~**Fix the auth bugs**~~ ✅ Done: per-user logout, `isActive` check at login/refresh, `returnTo` validation, `/api/test-edit-user` deleted, `/api/realtime` requires a session.
+3. ~~**Add rate limiting**~~ ✅ Done: login and forgot-password (`lib/upstash/ratelimit.ts`).
+4. ~~**Validate on the server**~~ ✅ Done: dashboard actions `parse` their module's `schema.ts`; auth actions use `lib/validation/auth.ts` and return `{ success, error }` instead of throwing.
 5. **Use transactions** for purchase update/receive and for audit log inserts. Make `realtime.emit` best-effort (`try/catch`).
 6. **Friendly errors** for FK and unique violations (`P2003`, `P2002`).
 7. **Add testing and CI:** Vitest + Playwright, and a GitHub Actions workflow running `tsc`, lint and tests.

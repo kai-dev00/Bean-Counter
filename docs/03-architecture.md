@@ -49,7 +49,6 @@ flowchart LR
 │   ├── api/
 │   │   ├── auth/refresh/route.ts  # Rotates tokens, then redirects back
 │   │   ├── realtime/route.ts      # Upstash realtime SSE endpoint
-│   │   └── test-edit-user/route.ts  # ⚠️ leftover debug route (see 07)
 │   ├── dashboard/               # Everything behind login
 │   │   ├── layout.tsx           #   Loads the current user, wraps in AuthProvider + shell
 │   │   ├── layout-wrapper.tsx   #   Sidebar + header + RealtimeProvider (client)

@@ -3,32 +3,39 @@
 import { setAuthCookies } from "@/lib/cookies";
 import { signAccessToken, signRefreshToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
+import { checkLoginLimit, resetLoginLimit } from "@/lib/upstash/ratelimit";
+import {
+  ActionResult,
+  firstIssue,
+  LoginFormValues,
+  loginSchema,
+} from "@/lib/validation/auth";
 import bcrypt from "bcryptjs";
-import { LoginFormValues } from "../(auth)/login/page";
 
-export async function loginAction(data: LoginFormValues) {
-  const { email, password } = data;
+export async function loginAction(data: LoginFormValues): Promise<ActionResult> {
+  const parsed = loginSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false, error: firstIssue(parsed.error) };
+  }
+  const { email, password } = parsed.data;
 
-  if (typeof email !== "string" || typeof password !== "string")
-    throw new Error("Invalid form data");
+  if (!(await checkLoginLimit(email))) {
+    return {
+      success: false,
+      error: "Too many login attempts. Please try again later.",
+    };
+  }
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: {
-      role: {
-        include: { permissions: true },
-      },
-    },
   });
 
-  if (!user) {
-    throw new Error("Invalid email or password");
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return { success: false, error: "Invalid email or password" };
   }
 
-  const isValid = await bcrypt.compare(password, user.password);
-
-  if (!isValid) {
-    throw new Error("Invalid email or password");
+  if (!user.isActive) {
+    return { success: false, error: "This account has been deactivated" };
   }
 
   const accessToken = await signAccessToken({
@@ -49,5 +56,6 @@ export async function loginAction(data: LoginFormValues) {
   });
 
   await setAuthCookies(accessToken, refreshToken);
+  await resetLoginLimit(email);
   return { success: true };
 }

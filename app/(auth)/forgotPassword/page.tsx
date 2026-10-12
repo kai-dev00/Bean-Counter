@@ -6,17 +6,15 @@ import { useForm } from "react-hook-form";
 import { CustomInput } from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const forgotPasswordSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
-});
-
-export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+import {
+  ForgotPasswordFormValues,
+  forgotPasswordSchema,
+} from "@/lib/validation/auth";
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -30,7 +28,12 @@ export default function ForgotPasswordPage() {
   });
 
   async function onSubmit(data: ForgotPasswordFormValues) {
-    await forgotPasswordAction(data);
+    setServerError(null);
+    const result = await forgotPasswordAction(data);
+    if (!result.success) {
+      setServerError(result.error);
+      return;
+    }
     setSubmitted(true);
   }
 
@@ -59,6 +62,11 @@ export default function ForgotPasswordPage() {
         className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
         <h1 className="text-xl font-semibold mb-4">Forgot Password</h1>
+        {serverError && (
+          <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {serverError}
+          </div>
+        )}
         <CustomInput
           label="Email"
           type="email"

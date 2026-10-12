@@ -1,12 +1,15 @@
 import { getCurrentUserWithDetails } from "@/lib/auth";
 import { getRolesCount } from "../actions/roles";
 import { RolesManagementClient } from "../components/RolesManagementClient";
+import { requirePermission } from "@/lib/auth-guard";
 
 export default async function RolesPage({
   searchParams,
 }: {
   searchParams: Promise<{ search?: string }>;
 }) {
+  await requirePermission("access-management:read:roles");
+
   const { search } = await searchParams;
 
   const roles = await getRolesCount();

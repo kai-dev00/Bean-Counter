@@ -5,7 +5,11 @@ export async function GET(request: Request) {
   console.log("🔄 Refresh API called");
 
   const { searchParams } = new URL(request.url);
-  const returnTo = searchParams.get("returnTo") || "/dashboard";
+  const requested = searchParams.get("returnTo");
+
+  // Only allow same-origin relative paths ("/x"), not "//evil.com" or "/\evil.com"
+  const returnTo =
+    requested && /^\/(?![/\\])/.test(requested) ? requested : "/dashboard";
 
   try {
     await refreshAction();

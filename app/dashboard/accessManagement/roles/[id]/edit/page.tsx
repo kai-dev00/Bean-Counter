@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 import { RoleForm } from "../../../components/RolesManagementForm";
 import { getAllPermissions, getRoleById } from "../../../actions/roles";
+import { requirePermission } from "@/lib/auth-guard";
 
 type Props = {
   params: { id: string };
 };
 
 export default async function EditRolePage({ params }: Props) {
+  await requirePermission("access-management:update:roles");
+
   const { id } = await params;
   const [role, permissions] = await Promise.all([
     getRoleById(id),

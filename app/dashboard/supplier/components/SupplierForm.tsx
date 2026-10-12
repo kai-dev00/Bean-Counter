@@ -7,7 +7,7 @@ import CustomButton from "@/components/CustomButton";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { CustomInput } from "@/components/CustomInput";
-import { SupplierFormValues, supplierSchema } from "../SupplierClient";
+import { SupplierFormValues, supplierSchema } from "../schema";
 import { createSupplier, updateSupplier } from "../actions";
 
 type SupplierFormProps = {

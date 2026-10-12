@@ -6,16 +6,15 @@ import CustomButton from "@/components/CustomButton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import z from "zod";
-
-const resetPasswordSchema = z.object({
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-type ResetFormValues = z.infer<typeof resetPasswordSchema>;
+import { useState } from "react";
+import {
+  ResetPasswordFormValues as ResetFormValues,
+  resetPasswordSchema,
+} from "@/lib/validation/auth";
 
 export default function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -26,7 +25,12 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   });
 
   async function onSubmit(data: ResetFormValues) {
-    await resetPasswordAction({ token, password: data.password });
+    setServerError(null);
+    const result = await resetPasswordAction({ token, password: data.password });
+    if (!result.success) {
+      setServerError(result.error);
+      return;
+    }
     router.push("/login");
   }
 
@@ -37,6 +41,11 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
         <h1 className="text-xl font-semibold mb-4">Reset Password</h1>
+        {serverError && (
+          <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {serverError}
+          </div>
+        )}
 
         <CustomInput
           label="New Password"

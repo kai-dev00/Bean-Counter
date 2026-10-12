@@ -46,7 +46,7 @@ Suggested per-environment settings:
 
 ## Deploy checklist
 
-1. Fix or accept the 🔴 items in [07 – Security findings](./07-auth-and-security.md#security-findings), at least server-side permission checks and deleting `/api/test-edit-user`.
+1. Review the remaining open items in [07 – Security findings](./07-auth-and-security.md#security-findings). The 🔴 items are fixed.
 2. Set every environment variable on the host.
 3. Run `npx prisma migrate deploy` against the production database **before** starting the new version.
 4. First deploy only: `npx prisma db seed` to create permissions and roles. ⚠️ This also creates the three sample users from `users.json`, so change their passwords right away or remove them from the seed.

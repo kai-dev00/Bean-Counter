@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { CustomInput } from "@/components/CustomInput";
 import { createInventory, updateInventory } from "../actions";
-import { inventorySchema, InventoryWithCategory } from "../InventoryClient";
-import { InventoryFormValues } from "../InventoryClient";
+import { InventoryWithCategory } from "../InventoryClient";
+import { InventoryFormValues, inventorySchema } from "../schema";
 import CustomDropdown from "@/components/CustomDropdown";
 
 import { Category, InventoryUnit } from "@/app/generated/prisma/browser";

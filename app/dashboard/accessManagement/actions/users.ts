@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { randomBytes } from "crypto";
-import { UserFormValues } from "../schema";
+import { UserFormValues, userFormSchema } from "../schema";
 import { sendInviteEmail } from "@/lib/email";
 import { requirePermission } from "@/lib/auth-guard";
 import { getCurrentUserWithName } from "@/lib/auth";
@@ -16,6 +16,7 @@ import { realtime } from "@/lib/upstash/realtime";
 // Invite Action
 export async function inviteUserAction(input: UserFormValues) {
   await requirePermission("access-management:create:users");
+  input = userFormSchema.parse(input);
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
   if (!input.firstName?.trim()) {
@@ -82,6 +83,9 @@ export async function inviteUserAction(input: UserFormValues) {
 
 //Edit Action
 export async function editUserAction(input: UserFormValues) {
+  await requirePermission("access-management:update:users");
+  input = userFormSchema.parse(input);
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 
@@ -162,6 +166,8 @@ export async function deleteAccessAction(
   id: string,
   source: "USER" | "INVITE",
 ) {
+  await requirePermission("access-management:delete:users");
+
   const currentUser = await getCurrentUserWithName();
   const userId = currentUser?.userId ?? null;
 
@@ -202,6 +208,8 @@ export async function deleteAccessAction(
 }
 
 export async function getUsers() {
+  await requirePermission("access-management:read:users");
+
   return await prisma.user.findMany({
     select: {
       id: true,
@@ -226,6 +234,8 @@ export async function getUsers() {
 }
 
 export async function getInvites() {
+  await requirePermission("access-management:read:users");
+
   return await prisma.userInvite.findMany({
     select: {
       id: true,
@@ -247,6 +257,8 @@ export async function getInvites() {
 }
 
 export async function getRoles() {
+  await requirePermission("access-management:read:users");
+
   return await prisma.role.findMany({
     select: {
       id: true,
