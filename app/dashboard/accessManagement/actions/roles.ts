@@ -9,163 +9,197 @@ import {
   deleteWithLog,
   updateWithLog,
 } from "@/lib/types/prismaLogger";
-import { realtime } from "@/lib/upstash/realtime";
+import { emitActivity } from "@/lib/upstash/realtime";
 import { RoleFormValues, roleSchema } from "../schema";
+import { ActionError, ActionResult, runAction } from "@/lib/action-result";
+
+const ROLES_PATH = "/dashboard/accessManagement/roles";
+const DUPLICATE_NAME = "Role with this name already exists";
 
 // Create Action
-export async function createRoleAction(data: RoleFormValues) {
+export async function createRoleAction(
+  data: RoleFormValues,
+): Promise<ActionResult> {
   await requirePermission("access-management:create:roles");
 
-  const validated = roleSchema.parse(data);
+  return runAction(
+    async () => {
+      const validated = roleSchema.parse(data);
 
-  const existing = await prisma.role.findUnique({
-    where: { name: validated.name },
-  });
+      const existing = await prisma.role.findUnique({
+        where: { name: validated.name },
+      });
 
-  if (existing) {
-    throw new Error("Role with this name already exists");
-  }
-  const currentUser = await getCurrentUserWithName();
-  const userId = currentUser?.userId ?? null;
-  const newRole = (await createWithLog(
-    "role",
-    {
-      name: validated.name,
-      description: validated.description,
-      permissions: {
-        connect: validated.permissionIds.map((id) => ({ id })),
-      },
+      if (existing) {
+        throw new ActionError(DUPLICATE_NAME);
+      }
+      const currentUser = await getCurrentUserWithName();
+      const userId = currentUser?.userId ?? null;
+      const newRole = (await createWithLog(
+        "role",
+        {
+          name: validated.name,
+          description: validated.description,
+          permissions: {
+            connect: validated.permissionIds.map((id) => ({ id })),
+          },
+        },
+        {
+          userId,
+          module: "access-management",
+          submodule: "roles",
+        },
+        {
+          include: { permissions: true },
+        },
+      )) as { id: string };
+
+      await emitActivity({
+        action: "create",
+        module: "access-management",
+        submodule: "roles",
+        recordId: newRole.id,
+        user: currentUser?.fullName ?? null,
+        createdAt: new Date().toISOString(),
+      });
+
+      revalidatePath(ROLES_PATH);
     },
-    {
-      userId,
-      submodule: "roles",
-    },
-    {
-      include: { permissions: true },
-    },
-  )) as { id: string };
-
-  await realtime.emit("activity.created", {
-    action: "create",
-    module: "access-management",
-    submodule: "roles",
-    recordId: newRole.id,
-    user: currentUser?.fullName ?? null,
-    createdAt: new Date().toISOString(),
-  });
-
-  revalidatePath("/roles");
-  return newRole;
+    { P2002: DUPLICATE_NAME },
+  );
 }
 
 // Update Action
-export async function updateRoleAction(id: string, data: RoleFormValues) {
+export async function updateRoleAction(
+  id: string,
+  data: RoleFormValues,
+): Promise<ActionResult> {
   await requirePermission("access-management:update:roles");
 
-  const validated = roleSchema.parse(data);
+  return runAction(
+    async () => {
+      const validated = roleSchema.parse(data);
 
-  const existing = await prisma.role.findFirst({
-    where: {
-      name: validated.name,
-      NOT: { id },
+      const existing = await prisma.role.findFirst({
+        where: {
+          name: validated.name,
+          NOT: { id },
+        },
+      });
+
+      if (existing) {
+        throw new ActionError(DUPLICATE_NAME);
+      }
+
+      const currentUser = await getCurrentUserWithName();
+      const userId = currentUser?.userId ?? null;
+
+      const updatedRole = (await updateWithLog(
+        "role",
+        { id },
+        {
+          name: validated.name,
+          description: validated.description,
+          updatedBy: currentUser?.fullName ?? "System",
+          updatedAt: new Date(),
+          permissions: {
+            set: validated.permissionIds.map((id) => ({ id })),
+          },
+        },
+        {
+          userId,
+          module: "access-management",
+          submodule: "roles",
+        },
+        {
+          include: { permissions: true },
+        },
+      )) as { id: string };
+
+      await emitActivity({
+        action: "update",
+        module: "access-management",
+        submodule: "roles",
+        recordId: updatedRole.id,
+        user: currentUser?.fullName ?? null,
+        createdAt: new Date().toISOString(),
+      });
+
+      revalidatePath(ROLES_PATH);
+      revalidatePath(`${ROLES_PATH}/${id}/edit`);
     },
-  });
-
-  if (existing) {
-    throw new Error("Role with this name already exists");
-  }
-
-  const currentUser = await getCurrentUserWithName();
-  const userId = currentUser?.userId ?? null;
-
-  const updatedRole = (await updateWithLog(
-    "role",
-    { id },
-    {
-      name: validated.name,
-      description: validated.description,
-      updatedBy: currentUser?.fullName ?? "System",
-      updatedAt: new Date(),
-      permissions: {
-        set: validated.permissionIds.map((id) => ({ id })),
-      },
-    },
-    {
-      userId,
-      submodule: "roles",
-    },
-    {
-      include: { permissions: true },
-    },
-  )) as { id: string };
-
-  await realtime.emit("activity.created", {
-    action: "update",
-    module: "access-management",
-    submodule: "roles",
-    recordId: updatedRole.id,
-    user: currentUser?.fullName ?? null,
-    createdAt: new Date().toISOString(),
-  });
-
-  revalidatePath("/roles");
-  revalidatePath(`/roles/${id}/edit`);
-
-  return updatedRole;
+    { P2002: DUPLICATE_NAME },
+  );
 }
 
 // Delete Action
-export async function deleteRoleAction(id: string) {
+export async function deleteRoleAction(id: string): Promise<ActionResult> {
   await requirePermission("access-management:delete:roles");
 
-  const currentUser = await getCurrentUserWithName();
-  const currentUserRoleId = currentUser?.roleId;
-  const userId = currentUser?.userId ?? null;
+  return runAction(
+    async () => {
+      const currentUser = await getCurrentUserWithName();
+      const currentUserRoleId = currentUser?.roleId;
+      const userId = currentUser?.userId ?? null;
 
-  const roleToDelete = await prisma.role.findUnique({
-    where: { id },
-    include: { permissions: true },
-  });
+      const roleToDelete = await prisma.role.findUnique({
+        where: { id },
+        include: { permissions: true },
+      });
 
-  if (!roleToDelete) throw new Error("Role not found");
+      if (!roleToDelete) throw new ActionError("Role not found");
 
-  if (id === currentUserRoleId) {
-    throw new Error("You cannot delete role that has been assigned to you.");
-  }
+      if (id === currentUserRoleId) {
+        throw new ActionError(
+          "You cannot delete role that has been assigned to you.",
+        );
+      }
 
-  const usersCount = await prisma.user.count({ where: { roleId: id } });
-  if (usersCount > 0)
-    throw new Error(`Cannot delete role. ${usersCount} user(s) are assigned.`);
+      const usersCount = await prisma.user.count({ where: { roleId: id } });
+      if (usersCount > 0)
+        throw new ActionError(
+          `Cannot delete role. ${usersCount} user(s) are assigned.`,
+        );
 
-  const invitesCount = await prisma.userInvite.count({ where: { roleId: id } });
-  if (invitesCount > 0)
-    throw new Error(
-      `Cannot delete role. ${invitesCount} invite(s) are assigned.`,
-    );
+      const invitesCount = await prisma.userInvite.count({
+        where: { roleId: id },
+      });
+      if (invitesCount > 0)
+        throw new ActionError(
+          `Cannot delete role. ${invitesCount} invite(s) are assigned.`,
+        );
 
-  await prisma.role.update({
-    where: { id },
-    data: { permissions: { set: [] } },
-  });
+      // Unlinking permissions and deleting the role succeed or fail together
+      await prisma.$transaction(async (tx) => {
+        await tx.role.update({
+          where: { id },
+          data: { permissions: { set: [] } },
+        });
 
-  const deletedRole = await deleteWithLog(
-    "role",
-    { id },
-    { userId, submodule: "roles" },
-    { before: roleToDelete },
+        await deleteWithLog(
+          "role",
+          { id },
+          { userId, module: "access-management", submodule: "roles", tx },
+          { before: roleToDelete },
+        );
+      });
+
+      await emitActivity({
+        action: "delete",
+        module: "access-management",
+        submodule: "roles",
+        recordId: id,
+        user: currentUser?.fullName ?? null,
+        createdAt: new Date().toISOString(),
+      });
+
+      revalidatePath(ROLES_PATH);
+    },
+    {
+      // A user or invite was assigned between the checks above and the delete
+      P2003: "This role is still assigned to users or invites.",
+    },
   );
-
-  await realtime.emit("activity.created", {
-    action: "delete",
-    module: "access-management",
-    submodule: "roles",
-    recordId: id,
-    user: currentUser?.fullName ?? null,
-    createdAt: new Date().toISOString(),
-  });
-
-  revalidatePath("/roles");
-  return deletedRole;
 }
 
 export async function getRolesCount() {

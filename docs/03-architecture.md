@@ -28,7 +28,7 @@ flowchart LR
   RSC -- serialized props --> UI
   UI -- call action --> SA
   SA --> LOG --> DB
-  SA -- realtime.emit --> UP
+  SA -- emitActivity --> UP
   SA -- nodemailer --> GM
   RT -- SSE subscribe --> RH --> UP
   PX -- expired access token --> RH
@@ -110,13 +110,13 @@ sequenceDiagram
   A->>L: createWithLog("inventory", data, {userId})
   L->>DB: inventory.create
   L->>DB: actionLog.create (before = null, after = row)
-  A->>R: realtime.emit("activity.created", {...})
+  A->>R: emitActivity({...}) (best-effort)
   R-->>D: SSE event → Recent Activity updates
   A-->>F: { success: true }
   F->>F: toast + router.refresh() (re-runs page.tsx)
 ```
 
-After a successful action, the client calls `router.refresh()` to re-render the server component with fresh data. Only the role actions use `revalidatePath`.
+After a successful action, the client calls `router.refresh()` to re-render the server component with fresh data. The role actions also call `revalidatePath("/dashboard/accessManagement/roles")`.
 
 ## Authentication at the edge
 
@@ -133,7 +133,7 @@ Full flows are in [07 – Auth & security](./07-auth-and-security.md).
 ## Realtime activity feed
 
 - [`lib/upstash/realtime.ts`](../lib/upstash/realtime.ts) defines a typed schema with one event, `activity.created` (`action`, `module`, `submodule`, `recordId`, `user`, `createdAt`).
-- Server actions call `realtime.emit(...)` after each write.
+- Server actions call `emitActivity(...)` after each write. It's best-effort: a Redis failure is logged and doesn't fail the action.
 - [`app/api/realtime/route.ts`](../app/api/realtime/route.ts) exposes the Upstash `handle()` endpoint. [`layout-wrapper.tsx`](../app/dashboard/layout-wrapper.tsx) wraps the dashboard in `<RealtimeProvider api={{ url: "/api/realtime" }}>`.
 - [`dashboardClient.tsx`](../app/dashboard/_dashboard-components/dashboardClient.tsx) subscribes with `useRealtime` and prepends new events to the "Recent Activity" list.
 

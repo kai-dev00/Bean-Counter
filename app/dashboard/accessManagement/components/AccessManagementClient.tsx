@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { useState } from "react";
 import { PageCard } from "@/components/PageCard";
 import { DataTable, Column } from "@/components/DataTable";
@@ -70,7 +71,7 @@ export default function AccessManagementClient({
     if (!deleteUser) return;
     setDeleting(true);
     try {
-      await deleteAccessAction(deleteUser.id, deleteUser.source);
+      await unwrap(deleteAccessAction(deleteUser.id, deleteUser.source));
       showToast.success("User deleted", "The user has been removed");
       router.refresh();
       setDeleteUser(null);

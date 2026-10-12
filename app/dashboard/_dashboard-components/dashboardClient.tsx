@@ -64,6 +64,10 @@ const moduleRoutes: Record<string, string> = {
   purchase: "/dashboard/purchase",
   "access-management:users": "/dashboard/accessManagement/users",
   "access-management:roles": "/dashboard/accessManagement/roles",
+  // Audit rows written before the module fix stored the model name
+  user: "/dashboard/accessManagement/users",
+  userInvite: "/dashboard/accessManagement/users",
+  role: "/dashboard/accessManagement/roles",
 };
 
 export default function DashboardClient({

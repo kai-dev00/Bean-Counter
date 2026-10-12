@@ -66,11 +66,11 @@ To run something like this you'd need to `npm i -D vitest` and add a `vitest.con
 |---|---|---|---|
 | 1 | **Permission enforcement in server actions** | Most actions don't check permissions today. Tests would catch this and stop it coming back | `app/dashboard/*/actions.ts` |
 | 2 | **Auth flows:** login, refresh rotation, logout, inactive users, rate limits | Security-critical, and recently changed | `app/actions/auth.*.ts`, `proxy.ts`, `lib/upstash/ratelimit.ts` |
-| 3 | **Purchase lifecycle** | Receiving changes stock and status, there's no transaction, and DRAFT-only rules | `app/dashboard/purchase/actions.ts` |
+| 3 | **Purchase lifecycle** | Receiving changes stock and status in one transaction; DRAFT-only rules are enforced in the write itself | `app/dashboard/purchase/actions.ts` |
 | 4 | **Inventory status calculation** | Drives restock alerts, dashboard counts and filters | `computeInventoryStatus` |
 | 5 | **Invite and password reset** | Token expiry and single use | `actions/users.ts`, `auth.register.ts`, `auth.reset-password.ts` |
 | 6 | **Audit log wrappers** | Before/after snapshots on every write | `lib/types/prismaLogger.ts` |
 | 7 | **Dashboard aggregates** | Monthly spend buckets, trend %, top suppliers, value by category | `app/dashboard/page.tsx` |
 | 8 | **`DataTable` behaviour** | Search, multi-filter, date range, pagination, empty states | `components/DataTable.tsx` |
 | 9 | **`CustomDropdown`** | Single/multi select, search, keyboard, portal positioning | `components/CustomDropdown.tsx` |
-| 10 | **Seed script** | The MODERATOR mapping bug would have been caught | `prisma/seed.ts` |
+| 10 | **Seed script** | Role → permission mapping (MODERATOR was wrong before) | `prisma/seed.ts` |

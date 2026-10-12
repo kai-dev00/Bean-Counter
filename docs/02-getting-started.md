@@ -7,7 +7,7 @@
 | **Node.js** | Not pinned in `package.json`. Use a current LTS (the project was developed on Node 24). |
 | **npm** | The repo ships a `package-lock.json`, so use npm. |
 | **PostgreSQL** | Any reachable instance (local, Docker, or hosted). |
-| **Upstash Redis database** | Needed for the live activity feed. The app calls `realtime.emit(...)` on every write, so writes fail without valid credentials. See [Troubleshooting](./11-troubleshooting.md#writes-show-something-went-wrong-but-the-data-is-saved). |
+| **Upstash Redis database** | Needed for the live activity feed and rate limiting. Writes still succeed without it (the emit is best-effort and rate limits fail open), but the feed stays empty. |
 | **Gmail account with an App Password** | Needed to send invite and password-reset emails. |
 
 ## Install
@@ -32,7 +32,7 @@ Open <http://localhost:3000>. `/` redirects to `/login`.
 
 ### First login
 
-The seed creates three users (one per role) from [`prisma/data/users.json`](../prisma/data/users.json). That file is where their emails and **plain-text starter passwords** live.
+The seed creates seven users (at least one per role, plus an inactive one) from [`prisma/data/users.json`](../prisma/data/users.json). That file is where their emails and **plain-text starter passwords** live.
 
 > ⚠️ Change those passwords before any shared or production use (or edit `users.json` before seeding). Don't commit real credentials to this file.
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@/components/CustomButton";
@@ -54,17 +55,17 @@ export default function InventoryForm({
   const onSubmit = async (values: InventoryFormValues) => {
     try {
       if (inventory) {
-        await updateInventory(inventory.id, values);
+        await unwrap(updateInventory(inventory.id, values));
         showToast.success("Inventory successfully updated");
       } else {
-        await createInventory(values);
+        await unwrap(createInventory(values));
         showToast.success("Inventory successfully created");
       }
 
       router.refresh();
       onSuccess();
-    } catch {
-      showToast.error("Something went wrong");
+    } catch (err) {
+      showToast.error("Something went wrong", (err as Error).message);
     }
   };
 

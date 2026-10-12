@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { DataTable, Column } from "@/components/DataTable";
 import CustomButton from "@/components/CustomButton";
 import { Pencil, Trash2, Eye, Download } from "lucide-react";
@@ -44,12 +45,12 @@ export default function SupplierTable({
     if (!deleteUser) return;
     setDeleting(true);
     try {
-      await deleteSupplier(deleteUser.id);
+      await unwrap(deleteSupplier(deleteUser.id));
       showToast.success("Supplier deleted", "The supplier has been removed");
       router.refresh();
       setDeleteUser(null);
     } catch (err) {
-      showToast.error("Delete failed", "Unable to delete supplier");
+      showToast.error("Delete failed", (err as Error).message);
       console.error(err);
     } finally {
       setDeleting(false);

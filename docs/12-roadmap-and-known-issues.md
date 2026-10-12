@@ -10,7 +10,7 @@ The team keeps a personal notes file instead: [`todo's.ts`](../todo's.ts). It's 
 |---|---|---|
 | 2/15/2026 | Add primary and secondary colours to the theme | ✅ Mostly done: theme tokens now use the Prussian Blue / Orange palette (`app/globals.css`) |
 | 2/15/2026 | Add text label variants | ❌ No typography/label variant component |
-| 2/16/2026 | Fix the main module name in the access-management audit log (logger uses the model name, which doesn't match `access-management`) | ❌ Still open: `ActionLog.module` stores `userInvite`/`role`/`user` |
+| 2/16/2026 | Fix the main module name in the access-management audit log | ✅ Done: access-management actions log `module = "access-management"` |
 | 2/17/2026 | Change `Float` to `Decimal` for the category total price | ❌ `Category.totalPrice` is still `Float` (and unused) |
 | 2/17/2026 | Enhance the profile page | ❌ Profile only shows details and the change-password form |
 | 2/17/2026 | Enhance the table component UI | ✅ Done since (search icon, multi-filters, empty states, numeric columns) |
@@ -23,11 +23,6 @@ The team keeps a personal notes file instead: [`todo's.ts`](../todo's.ts). It's 
 
 | Bug | Impact | Location |
 |---|---|---|
-| MODERATOR seed uses wrong module names | The role gets no category or users/roles permissions | `prisma/data/roles.json` |
-| `revalidatePath("/roles")` uses the wrong path | Does nothing (pages refresh via `router.refresh()` anyway) | `accessManagement/actions/roles.ts` |
-| Multi-step writes aren't transactional | Partial updates possible in `updatePurchase` / `receivePurchase`. Audit log rows can go missing | `purchase/actions.ts`, `lib/types/prismaLogger.ts` |
-| `realtime.emit` failure fails the action after the DB write | Saved data reported as an error | all actions |
-| Deleting an inventory, category or supplier that has purchases | Generic error (FK violation) | see [11](./11-troubleshooting.md#delete-fails-with-a-foreign-key-error-prisma-p2003) |
 | Hooks called after an early `return <NoPermission />` | Lint errors (`react-hooks/rules-of-hooks`). Can crash if permissions change between renders | `AccessManagementClient.tsx`, `PurchaseClient.tsx`, `inventoryTable.tsx`, and others |
 | Type errors in role pages | `tsc` fails (`Permission.description` nullability) | `RolesManagementForm.tsx` |
 
@@ -48,8 +43,8 @@ The team keeps a personal notes file instead: [`todo's.ts`](../todo's.ts). It's 
 2. ~~**Fix the auth bugs**~~ ✅ Done: per-user logout, `isActive` check at login/refresh, `returnTo` validation, `/api/test-edit-user` deleted, `/api/realtime` requires a session.
 3. ~~**Add rate limiting**~~ ✅ Done: login and forgot-password (`lib/upstash/ratelimit.ts`).
 4. ~~**Validate on the server**~~ ✅ Done: dashboard actions `parse` their module's `schema.ts`; auth actions use `lib/validation/auth.ts` and return `{ success, error }` instead of throwing.
-5. **Use transactions** for purchase update/receive and for audit log inserts. Make `realtime.emit` best-effort (`try/catch`).
-6. **Friendly errors** for FK and unique violations (`P2003`, `P2002`).
+5. ~~**Use transactions**~~ ✅ Done: audit-logged writes are transactional, purchase update/receive are atomic with a DRAFT guard, `emitActivity` is best-effort.
+6. ~~**Friendly errors**~~ ✅ Done: dashboard actions return `ActionResult` via `runAction`, with per-action `P2002` / `P2003` / `P2025` messages. Also fixed: MODERATOR seed and audit log module names.
 7. **Add testing and CI:** Vitest + Playwright, and a GitHub Actions workflow running `tsc`, lint and tests.
 8. **Data model:** add `receivedAt` to `Purchase`, indexes on `PurchaseItem` foreign keys, drop or fix `Category.totalPrice`, and a stock-movement table for usage and adjustments.
 9. **Server-side pagination and search** for large tables.

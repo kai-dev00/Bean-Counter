@@ -17,3 +17,15 @@ const schema = {
 
 export const realtime = new Realtime({ schema, redis });
 export type RealtimeEvents = InferRealtimeEvents<typeof realtime>;
+
+type ActivityEvent = z.infer<typeof schema.activity.created>;
+
+// Best-effort: the write has already been saved, so a Redis hiccup must not
+// make the action report failure
+export async function emitActivity(event: ActivityEvent) {
+  try {
+    await realtime.emit("activity.created", event);
+  } catch (error) {
+    console.error("Realtime emit failed:", error);
+  }
+}

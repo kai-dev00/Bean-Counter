@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -63,13 +64,13 @@ export function RoleForm({ role, permissions }: Props) {
   async function onSubmit(data: RoleFormValues) {
     try {
       if (isEdit) {
-        await updateRoleAction(role!.id, data);
+        await unwrap(updateRoleAction(role!.id, data));
         showToast.success(
           "Role updated",
           "The role has been successfully updated. Please relogin to apply changes.",
         );
       } else {
-        await createRoleAction(data);
+        await unwrap(createRoleAction(data));
         showToast.success(
           "Role created",
           "The role has been successfully created.",

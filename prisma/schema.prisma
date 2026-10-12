@@ -131,7 +131,8 @@ model ActionLog {
 
   createdAt DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id])
+  // Keep the history when a user is deleted; the row just loses its author
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([module])
@@ -190,7 +191,7 @@ model Inventory {
   updatedAt DateTime?
   updatedBy String?
 
-  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade) //delete also its inventories when category is deleted
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict) //a category can't be deleted while it still has items
   purchaseItems PurchaseItem[]
 
   @@index([categoryId])

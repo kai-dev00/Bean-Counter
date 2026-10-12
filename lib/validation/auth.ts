@@ -68,9 +68,7 @@ export const changePasswordSchema = z.object({
 });
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 
-// Auth actions return errors instead of throwing, because Next.js replaces
-// thrown messages with a generic one in production builds
-export type ActionResult = { success: true } | { success: false; error: string };
+export type { ActionResult } from "@/lib/action-result";
 
 export function firstIssue(error: z.ZodError) {
   return error.issues[0]?.message ?? "Invalid input";

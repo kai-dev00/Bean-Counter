@@ -8,10 +8,26 @@
     "name": "MODERATOR",
     "description": "Moderator with elevated permissions",
     "permissions": {
-      "modules": ["categories", "inventory", "supplier", "purchase"],
+      "modules": ["category", "inventory", "supplier", "purchase"],
       "extra": [
-        { "module": "users", "action": "read" },
-        { "module": "roles", "action": "read" }
+        { "module": "dashboard", "action": "read" },
+        { "module": "reports", "action": "read" },
+        { "module": "access-management", "action": "read", "submodule": "users" },
+        { "module": "access-management", "action": "read", "submodule": "roles" }
+      ]
+    }
+  },
+  {
+    "name": "INVENTORY_CLERK",
+    "description": "Manages stock and drafts purchases; can't receive, cancel or delete them",
+    "permissions": {
+      "modules": ["inventory"],
+      "extra": [
+        { "module": "dashboard", "action": "read" },
+        { "module": "category", "action": "read" },
+        { "module": "supplier", "action": "read" },
+        { "module": "purchase", "action": "read" },
+        { "module": "purchase", "action": "create" }
       ]
     }
   },

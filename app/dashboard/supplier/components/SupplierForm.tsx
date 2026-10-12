@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { Supplier } from "@/app/generated/prisma/browser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,17 +38,17 @@ export default function SupplierForm({
   const onSubmit = async (values: SupplierFormValues) => {
     try {
       if (supplier) {
-        await updateSupplier(supplier.id, values);
+        await unwrap(updateSupplier(supplier.id, values));
         showToast.success("Supplier successfully updated");
       } else {
-        await createSupplier(values);
+        await unwrap(createSupplier(values));
         showToast.success("Supplier successfully created");
       }
 
       router.refresh();
       onSuccess();
-    } catch {
-      showToast.error("Something went wrong");
+    } catch (err) {
+      showToast.error("Something went wrong", (err as Error).message);
     }
   };
 

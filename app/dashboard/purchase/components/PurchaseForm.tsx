@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@/components/CustomButton";
@@ -62,10 +63,10 @@ export default function PurchaseForm({
   const onSubmit = async (values: PurchaseFormValues) => {
     try {
       if (purchase) {
-        await updatePurchase(purchase.id, values);
+        await unwrap(updatePurchase(purchase.id, values));
         showToast.success("Purchase updated");
       } else {
-        await createPurchase(values);
+        await unwrap(createPurchase(values));
         showToast.success("Purchase created");
       }
       router.refresh();

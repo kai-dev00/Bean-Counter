@@ -6,9 +6,20 @@ import prisma from "@/lib/prisma";
 type PrismaModels = keyof typeof prisma;
 type ModelName = Exclude<PrismaModels, `$${string}`>; // exclude internal $ methods
 
+type Tx = Prisma.TransactionClient;
+
 interface LogContext {
   userId: string | null;
   submodule?: string;
+  // Module stored in ActionLog. Defaults to the model name
+  module?: string;
+  // Join a caller's transaction instead of opening a new one
+  tx?: Tx;
+}
+
+// The record write and its ActionLog row commit (or roll back) together
+function inTransaction<T>(context: LogContext, fn: (tx: Tx) => Promise<T>) {
+  return context.tx ? fn(context.tx) : prisma.$transaction(fn);
 }
 
 // -------------------- CREATE --------------------
@@ -18,21 +29,23 @@ export async function createWithLog<T>(
   context: LogContext,
   options?: any,
 ): Promise<T> {
-  const result = await (prisma as any)[model].create({ data, ...options });
+  return inTransaction(context, async (tx) => {
+    const result = await (tx as any)[model].create({ data, ...options });
 
-  await prisma.actionLog.create({
-    data: {
-      userId: context.userId,
-      module: String(model),
-      submodule: context.submodule ?? result.id,
-      action: "create",
-      recordId: result.id,
-      before: Prisma.JsonNull,
-      after: result ?? Prisma.JsonNull,
-    },
+    await tx.actionLog.create({
+      data: {
+        userId: context.userId,
+        module: context.module ?? String(model),
+        submodule: context.submodule ?? result.id,
+        action: "create",
+        recordId: result.id,
+        before: Prisma.JsonNull,
+        after: result ?? Prisma.JsonNull,
+      },
+    });
+
+    return result as T;
   });
-
-  return result as T;
 }
 
 // -------------------- UPDATE --------------------
@@ -43,90 +56,61 @@ export async function updateWithLog<T>(
   context: LogContext,
   options?: any,
 ): Promise<T> {
-  let before = null;
-  try {
-    // before = await (prisma as any)[model].findUnique({ where });
-    before = await (prisma as any)[model].findUnique({ where, ...options });
-  } catch {}
+  return inTransaction(context, async (tx) => {
+    const before = await (tx as any)[model].findUnique({ where, ...options });
 
-  const result = await (prisma as any)[model].update({
-    where,
-    data,
-    ...options,
+    // Throws P2025 if `where` no longer matches (e.g. a status guard)
+    const result = await (tx as any)[model].update({
+      where,
+      data,
+      ...options,
+    });
+
+    await tx.actionLog.create({
+      data: {
+        userId: context.userId,
+        module: context.module ?? String(model),
+        submodule: context.submodule ?? result.id,
+        action: "update",
+        recordId: result.id,
+        before: before ?? Prisma.JsonNull,
+        after: result ?? Prisma.JsonNull,
+      },
+    });
+
+    return result as T;
   });
-
-  await prisma.actionLog.create({
-    data: {
-      userId: context.userId,
-      module: String(model),
-      submodule: context.submodule ?? result.id,
-      action: "update",
-      recordId: result.id,
-      before: before ?? Prisma.JsonNull,
-      after: result ?? Prisma.JsonNull,
-    },
-  });
-
-  return result as T;
 }
 
 // -------------------- DELETE --------------------
-// export async function deleteWithLog<T>(
-//   model: ModelName,
-//   where: any,
-//   context: LogContext,
-//   options?: any,
-// ): Promise<T> {
-//   let before = null;
-//   try {
-//     before = await (prisma as any)[model].findUnique({
-//       where,
-//       include: options?.include ?? {},
-//     });
-//   } catch {}
-
-//   const result = await (prisma as any)[model].delete({ where });
-
-//   await prisma.actionLog.create({
-//     data: {
-//       userId: context.userId,
-//       module: String(model),
-//       submodule: context.submodule ?? result.id,
-//       action: "delete",
-//       recordId: result.id,
-//       before: before ?? Prisma.JsonNull,
-//       after: Prisma.JsonNull,
-//     },
-//   });
-
-//   return result as T;
-// }
 export async function deleteWithLog<T>(
   model: ModelName,
   where: any,
   context: LogContext,
   options?: { include?: any; before?: any },
 ): Promise<T> {
-  const before =
-    options?.before ??
-    (await (prisma as any)[model].findUnique({
-      where,
-      include: options?.include ?? {},
-    }));
+  return inTransaction(context, async (tx) => {
+    const before =
+      options?.before ??
+      (await (tx as any)[model].findUnique({
+        where,
+        include: options?.include ?? {},
+      }));
 
-  const result = await (prisma as any)[model].delete({ where });
+    const result = await (tx as any)[model].delete({ where });
 
-  await prisma.actionLog.create({
-    data: {
-      userId: context.userId,
-      module: String(model),
-      submodule: context.submodule ?? result.id?.toString() ?? null,
-      action: "delete",
-      recordId: result.id,
-      before: before ?? Prisma.JsonNull,
-      after: Prisma.JsonNull,
-    },
+    await tx.actionLog.create({
+      data: {
+        userId: context.userId,
+        module: context.module ?? String(model),
+        submodule: context.submodule ?? result.id?.toString() ?? null,
+        action: "delete",
+        recordId: result.id,
+        before: before ?? Prisma.JsonNull,
+        after: Prisma.JsonNull,
+      },
+    });
+
+    return result as T;
   });
-
-  return result as T;
 }

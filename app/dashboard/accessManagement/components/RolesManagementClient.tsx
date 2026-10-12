@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import Link from "next/link";
 import { PageCard } from "@/components/PageCard";
 import { Pencil, Trash2 } from "lucide-react";
@@ -48,7 +49,7 @@ export function RolesManagementClient({
     if (!deleteModal.role) return;
     try {
       setIsDeleting(true);
-      await deleteRoleAction(deleteModal.role.id);
+      await unwrap(deleteRoleAction(deleteModal.role.id));
       showToast.success(
         "Role deleted",
         "The role has been successfully deleted.",

@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { DataTable, Column } from "@/components/DataTable";
 import CustomButton from "@/components/CustomButton";
 import { Pencil, Trash2, Eye, Download } from "lucide-react";
@@ -58,12 +59,12 @@ export default function InventoryTable({
     if (!deleteUser) return;
     setDeleting(true);
     try {
-      await deleteInventory(deleteUser.id);
+      await unwrap(deleteInventory(deleteUser.id));
       showToast.success("Inventory deleted", "The inventory has been removed");
       router.refresh();
       setDeleteUser(null);
     } catch (err) {
-      showToast.error("Delete failed", "Unable to delete inventory");
+      showToast.error("Delete failed", (err as Error).message);
       console.error(err);
     } finally {
       setDeleting(false);
