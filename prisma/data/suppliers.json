@@ -2,22 +2,85 @@
   {
     "name": "Bean Traders Inc",
     "email": "contact@beantraders.com",
-    "phone": "+1234567890",
+    "phone": "+63 917 555 0101",
     "address": "123 Coffee St, Manila",
-    "notes": "Primary coffee bean supplier"
+    "notes": "Primary coffee bean supplier. Delivers every Monday."
   },
   {
-    "name": "Café Equipment Co",
-    "email": "sales@cafeequip.com",
-    "phone": "+0987654321",
-    "address": "456 Industrial Ave, Makati",
-    "notes": "Equipment and machinery supplier"
+    "name": "Benguet Highland Coffee",
+    "email": "orders@benguethighland.ph",
+    "phone": "+63 918 555 0102",
+    "address": "45 Session Rd, Baguio City",
+    "notes": "Local arabica from the Cordilleras. Order 5 days ahead."
+  },
+  {
+    "name": "Batangas Barako Co",
+    "email": "sales@barakoco.ph",
+    "phone": "+63 919 555 0103",
+    "address": "8 P. Burgos St, Lipa City, Batangas",
+    "notes": "Liberica (barako) and robusta beans"
+  },
+  {
+    "name": "Fresh Dairy Distributors",
+    "email": "supply@freshdairy.ph",
+    "phone": "+63 920 555 0104",
+    "address": "210 Ortigas Ave, Pasig City",
+    "notes": "Cold chain delivery, Tuesday and Friday"
+  },
+  {
+    "name": "GreenLeaf Plant Milks",
+    "email": "hello@greenleafmilks.ph",
+    "phone": "+63 921 555 0105",
+    "address": "77 Kalayaan Ave, Quezon City",
+    "notes": "Oat, almond and soy milk. Minimum order of 12 cartons."
+  },
+  {
+    "name": "Sweet Syrup Trading",
+    "email": "orders@sweetsyrup.ph",
+    "phone": "+63 922 555 0106",
+    "address": "14 Pioneer St, Mandaluyong City",
+    "notes": "Flavor syrups and sauces"
+  },
+  {
+    "name": "Tea Garden Imports",
+    "email": "trade@teagarden.ph",
+    "phone": "+63 923 555 0107",
+    "address": "5 Binondo Plaza, Manila",
+    "notes": "Japanese matcha and assorted teas"
+  },
+  {
+    "name": "Golden Crust Bakery",
+    "email": "wholesale@goldencrust.ph",
+    "phone": "+63 924 555 0108",
+    "address": "301 Aurora Blvd, San Juan City",
+    "notes": "Daily pastry delivery before 7 AM"
+  },
+  {
+    "name": "PackRight Packaging",
+    "email": "sales@packright.ph",
+    "phone": "+63 925 555 0109",
+    "address": "Lot 9 Industrial Park, Valenzuela City",
+    "notes": "Cups, lids and paper bags. Bulk discounts over 5,000 pcs."
   },
   {
     "name": "General Supplies PH",
     "email": "info@generalsupplies.ph",
-    "phone": "+1122334455",
+    "phone": "+63 926 555 0110",
     "address": "789 Market Rd, Quezon City",
     "notes": "General goods and disposables"
+  },
+  {
+    "name": "CleanPro Solutions",
+    "email": "support@cleanpro.ph",
+    "phone": "+63 927 555 0111",
+    "address": "62 Shaw Blvd, Mandaluyong City",
+    "notes": "Food-safe cleaning chemicals"
+  },
+  {
+    "name": "Café Equipment Co",
+    "email": "sales@cafeequip.com",
+    "phone": "+63 928 555 0112",
+    "address": "456 Industrial Ave, Makati",
+    "notes": "Equipment, spare parts and servicing"
   }
 ]

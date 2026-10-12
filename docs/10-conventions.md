@@ -30,7 +30,7 @@ These conventions come from the existing code. There's no Prettier config or sty
 - One folder per feature module under `app/dashboard/<module>/`, containing `page.tsx`, `<Module>Client.tsx`, `actions.ts`, an optional `schema.ts`, and `components/`.
 - Shared UI goes in `components/`. Raw shadcn primitives go in `components/ui/` (add them with the shadcn CLI, configured in `components.json`).
 - Server-only helpers go in `lib/`.
-- Every DB write should go through `createWithLog` / `updateWithLog` / `deleteWithLog` so it's audited, followed by `realtime.emit("activity.created", …)`.
+- Every DB write should go through `createWithLog` / `updateWithLog` / `deleteWithLog` so it's audited (in the same transaction), followed by `emitActivity(…)`. Wrap the action body in `runAction` and return its `ActionResult`.
 
 ## Git workflow
 
@@ -72,24 +72,26 @@ Example: a **"Waste Log"** module for recording spoiled stock.
    import { requirePermission } from "@/lib/auth-guard";
    import { getCurrentUserWithName } from "@/lib/auth";
    import { createWithLog } from "@/lib/types/prismaLogger";
-   import { realtime } from "@/lib/upstash/realtime";
+   import { emitActivity } from "@/lib/upstash/realtime";
+   import { ActionResult, runAction } from "@/lib/action-result";
    import { wasteSchema, WasteFormValues } from "./schema";
 
-   export async function createWaste(values: WasteFormValues) {
-     await requirePermission("waste:create");          // enforce on the server
-     const data = wasteSchema.parse(values);           // validate on the server
-     const user = await getCurrentUserWithName();
-     const row = await createWithLog<{ id: string }>(
-       "wasteLog",
-       { ...data, createdBy: user?.fullName ?? "System" },
-       { userId: user?.userId ?? null, submodule: "" },
-     );
-     await realtime.emit("activity.created", {
-       action: "create", module: "waste", submodule: null,
-       recordId: row.id, user: user?.fullName ?? null,
-       createdAt: new Date().toISOString(),
-     });
-     return { success: true };
+   export async function createWaste(values: WasteFormValues): Promise<ActionResult> {
+     await requirePermission("waste:create");          // enforce on the server (outside runAction)
+     return runAction(async () => {
+       const data = wasteSchema.parse(values);         // validate on the server
+       const user = await getCurrentUserWithName();
+       const row = await createWithLog<{ id: string }>(
+         "wasteLog",
+         { ...data, createdBy: user?.fullName ?? "System" },
+         { userId: user?.userId ?? null, submodule: "" },
+       );
+       await emitActivity({
+         action: "create", module: "waste", submodule: null,
+         recordId: row.id, user: user?.fullName ?? null,
+         createdAt: new Date().toISOString(),
+       });
+     }, { P2002: "A waste entry with this name already exists." });
    }
    ```
 
@@ -97,7 +99,7 @@ Example: a **"Waste Log"** module for recording spoiled stock.
 
 5. **Page:** in `app/dashboard/waste/page.tsx`, call `requirePermission("waste:read")`, query with Prisma, convert `Decimal` → `number`, load permissions with `getCurrentUserWithDetails()`, and render `<WasteClient …/>`. Add `export const metadata = { title: "Waste Log" }`.
 
-6. **Client:** `WasteClient.tsx` uses `usePermission(permissions)`, `PageCard`, `DataTable` (mark quantity columns `numeric: true`, add `filters`), a `CustomModal` with the form (React Hook Form + `zodResolver`, `CustomInput` / `CustomDropdown` / `CustomButton`), and calls `router.refresh()` after saving.
+6. **Client:** `WasteClient.tsx` uses `usePermission(permissions)`, `PageCard`, `DataTable` (mark quantity columns `numeric: true`, add `filters`), a `CustomModal` with the form (React Hook Form + `zodResolver`, `CustomInput` / `CustomDropdown` / `CustomButton`), calls the action as `await unwrap(createWaste(values))` inside `try/catch`, and calls `router.refresh()` after saving.
 
 7. **Navigation:** add an entry to `navItems` in `app/dashboard/sidebar.tsx`, a title in `routeTitles` in `app/dashboard/header.tsx`, and `waste: "/dashboard/waste"` to `moduleRoutes` in `dashboardClient.tsx` so activity items link to it.
 

@@ -1,32 +1,57 @@
 [
-  {
-    "name": "Arabica Coffee Beans",
-    "description": "Premium single origin arabica beans",
-    "category": "Coffee Beans",
-    "quantity": 50,
-    "minimumStock": 10,
-    "unitPrice": 350,
-    "unit": "KG",
-    "status": "in_stock"
-  },
-  {
-    "name": "Espresso Machine",
-    "description": "Commercial grade espresso machine",
-    "category": "Equipments",
-    "quantity": 2,
-    "minimumStock": 1,
-    "unitPrice": 85000,
-    "unit": "PCS",
-    "status": "in_stock"
-  },
-  {
-    "name": "Paper Cups",
-    "description": "Disposable paper cups",
-    "category": "Others",
-    "quantity": 500,
-    "minimumStock": 100,
-    "unitPrice": 5,
-    "unit": "PCS",
-    "status": "in_stock"
-  }
+  { "name": "Arabica Coffee Beans", "description": "Premium single origin arabica beans", "category": "Coffee Beans", "quantity": 50, "minimumStock": 10, "unitPrice": 350, "unit": "KG" },
+  { "name": "Benguet Arabica Beans", "description": "Local highland arabica, medium roast", "category": "Coffee Beans", "quantity": 18, "minimumStock": 15, "unitPrice": 420, "unit": "KG" },
+  { "name": "Barako Liberica Beans", "description": "Strong Batangas barako, dark roast", "category": "Coffee Beans", "quantity": 12, "minimumStock": 8, "unitPrice": 380, "unit": "KG" },
+  { "name": "House Espresso Blend", "description": "70% arabica / 30% robusta espresso blend", "category": "Coffee Beans", "quantity": 25, "minimumStock": 10, "unitPrice": 400, "unit": "KG" },
+  { "name": "Robusta Coffee Beans", "description": "Robusta for blends and iced coffee", "category": "Coffee Beans", "quantity": 4, "minimumStock": 5, "unitPrice": 260, "unit": "KG" },
+  { "name": "Decaf Colombian Beans", "description": "Swiss water process decaf", "category": "Coffee Beans", "quantity": 0, "minimumStock": 3, "unitPrice": 520, "unit": "KG" },
+  { "name": "Ethiopia Yirgacheffe Beans", "description": "Seasonal single origin, light roast", "category": "Coffee Beans", "quantity": 2, "minimumStock": 0, "unitPrice": 780, "unit": "KG", "discontinued": true },
+
+  { "name": "Fresh Whole Milk", "description": "1L cartons, full cream", "category": "Dairy & Alternatives", "quantity": 60, "minimumStock": 30, "unitPrice": 95, "unit": "L" },
+  { "name": "Oat Milk", "description": "Barista edition oat milk, 1L", "category": "Dairy & Alternatives", "quantity": 14, "minimumStock": 12, "unitPrice": 185, "unit": "L" },
+  { "name": "Almond Milk", "description": "Unsweetened almond milk, 1L", "category": "Dairy & Alternatives", "quantity": 8, "minimumStock": 6, "unitPrice": 195, "unit": "L" },
+  { "name": "Soy Milk", "description": "Unsweetened soy milk, 1L", "category": "Dairy & Alternatives", "quantity": 10, "minimumStock": 4, "unitPrice": 120, "unit": "L" },
+  { "name": "Heavy Whipping Cream", "description": "36% fat cream for whipped toppings", "category": "Dairy & Alternatives", "quantity": 3, "minimumStock": 5, "unitPrice": 310, "unit": "L" },
+  { "name": "Condensed Milk", "description": "Sweetened condensed milk, 390g cans", "category": "Dairy & Alternatives", "quantity": 24, "minimumStock": 12, "unitPrice": 65, "unit": "PCS" },
+
+  { "name": "Vanilla Syrup", "description": "750ml bottle", "category": "Syrups & Sauces", "quantity": 9, "minimumStock": 4, "unitPrice": 450, "unit": "PCS" },
+  { "name": "Caramel Syrup", "description": "750ml bottle", "category": "Syrups & Sauces", "quantity": 5, "minimumStock": 4, "unitPrice": 450, "unit": "PCS" },
+  { "name": "Hazelnut Syrup", "description": "750ml bottle", "category": "Syrups & Sauces", "quantity": 0, "minimumStock": 2, "unitPrice": 460, "unit": "PCS" },
+  { "name": "Chocolate Sauce", "description": "1.9kg squeeze bottle", "category": "Syrups & Sauces", "quantity": 4, "minimumStock": 2, "unitPrice": 690, "unit": "PCS" },
+  { "name": "Salted Caramel Sauce", "description": "1.9kg squeeze bottle", "category": "Syrups & Sauces", "quantity": 2, "minimumStock": 2, "unitPrice": 720, "unit": "PCS" },
+  { "name": "Simple Syrup", "description": "House-made, 1L", "category": "Syrups & Sauces", "quantity": 6, "minimumStock": 3, "unitPrice": 80, "unit": "L" },
+
+  { "name": "Ceremonial Matcha Powder", "description": "Uji ceremonial grade matcha", "category": "Tea & Matcha", "quantity": 1500, "minimumStock": 500, "unitPrice": 4.5, "unit": "G" },
+  { "name": "English Breakfast Tea Bags", "description": "Box of 100 bags", "category": "Tea & Matcha", "quantity": 6, "minimumStock": 3, "unitPrice": 520, "unit": "PCS" },
+  { "name": "Chamomile Tea Bags", "description": "Box of 50 bags", "category": "Tea & Matcha", "quantity": 2, "minimumStock": 2, "unitPrice": 380, "unit": "PCS" },
+  { "name": "Chai Spice Mix", "description": "Masala chai spice blend", "category": "Tea & Matcha", "quantity": 800, "minimumStock": 600, "unitPrice": 1.2, "unit": "G" },
+
+  { "name": "Butter Croissant", "description": "Delivered daily", "category": "Pastries & Bakery", "quantity": 24, "minimumStock": 12, "unitPrice": 55, "unit": "PCS" },
+  { "name": "Blueberry Muffin", "description": "Delivered daily", "category": "Pastries & Bakery", "quantity": 10, "minimumStock": 10, "unitPrice": 60, "unit": "PCS" },
+  { "name": "Ensaymada", "description": "Classic cheese ensaymada", "category": "Pastries & Bakery", "quantity": 15, "minimumStock": 10, "unitPrice": 45, "unit": "PCS" },
+  { "name": "Chocolate Chip Cookie", "description": "Large soft-baked cookie", "category": "Pastries & Bakery", "quantity": 30, "minimumStock": 15, "unitPrice": 35, "unit": "PCS" },
+  { "name": "Banana Bread Loaf", "description": "Sliced into 10 portions", "category": "Pastries & Bakery", "quantity": 0, "minimumStock": 2, "unitPrice": 220, "unit": "PCS" },
+
+  { "name": "Paper Cups 12oz", "description": "Double-wall hot cups", "category": "Packaging & Disposables", "quantity": 500, "minimumStock": 100, "unitPrice": 5, "unit": "PCS" },
+  { "name": "Paper Cups 16oz", "description": "Double-wall hot cups", "category": "Packaging & Disposables", "quantity": 120, "minimumStock": 100, "unitPrice": 6, "unit": "PCS" },
+  { "name": "Plastic Cold Cups 16oz", "description": "PET cups for iced drinks", "category": "Packaging & Disposables", "quantity": 900, "minimumStock": 300, "unitPrice": 4, "unit": "PCS" },
+  { "name": "Dome Lids", "description": "Lids for cold cups", "category": "Packaging & Disposables", "quantity": 250, "minimumStock": 300, "unitPrice": 2, "unit": "PCS" },
+  { "name": "Paper Straws", "description": "Individually wrapped", "category": "Packaging & Disposables", "quantity": 1500, "minimumStock": 500, "unitPrice": 1, "unit": "PCS" },
+  { "name": "Cup Sleeves", "description": "Kraft cup sleeves", "category": "Packaging & Disposables", "quantity": 400, "minimumStock": 300, "unitPrice": 1.5, "unit": "PCS" },
+  { "name": "Kraft Takeaway Bags", "description": "Medium paper bags", "category": "Packaging & Disposables", "quantity": 200, "minimumStock": 100, "unitPrice": 7, "unit": "PCS" },
+  { "name": "Plastic Stirrers", "description": "Replaced by wooden stirrers", "category": "Packaging & Disposables", "quantity": 300, "minimumStock": 0, "unitPrice": 0.5, "unit": "PCS", "discontinued": true },
+
+  { "name": "Espresso Machine Cleaner", "description": "Group head cleaning tablets", "category": "Cleaning Supplies", "quantity": 3, "minimumStock": 2, "unitPrice": 950, "unit": "PCS" },
+  { "name": "Milk Frother Cleaner", "description": "Steam wand cleaning solution, 1L", "category": "Cleaning Supplies", "quantity": 2, "minimumStock": 2, "unitPrice": 680, "unit": "L" },
+  { "name": "Food-Safe Sanitizer", "description": "Surface sanitizer, 5L", "category": "Cleaning Supplies", "quantity": 4, "minimumStock": 2, "unitPrice": 540, "unit": "L" },
+  { "name": "Microfiber Cloths", "description": "Pack of 12", "category": "Cleaning Supplies", "quantity": 6, "minimumStock": 3, "unitPrice": 320, "unit": "PCS" },
+
+  { "name": "Espresso Machine", "description": "Commercial grade 2-group espresso machine", "category": "Equipments", "quantity": 2, "minimumStock": 1, "unitPrice": 85000, "unit": "PCS" },
+  { "name": "Coffee Grinder", "description": "Commercial flat burr grinder", "category": "Equipments", "quantity": 2, "minimumStock": 1, "unitPrice": 32000, "unit": "PCS" },
+  { "name": "Milk Pitcher 600ml", "description": "Stainless steel steaming pitcher", "category": "Equipments", "quantity": 6, "minimumStock": 4, "unitPrice": 650, "unit": "PCS" },
+  { "name": "Digital Coffee Scale", "description": "0.1g precision with timer", "category": "Equipments", "quantity": 3, "minimumStock": 2, "unitPrice": 1800, "unit": "PCS" },
+  { "name": "Tamper 58mm", "description": "Calibrated espresso tamper", "category": "Equipments", "quantity": 1, "minimumStock": 2, "unitPrice": 1500, "unit": "PCS" },
+
+  { "name": "Receipt Paper Rolls", "description": "Thermal paper, 57mm", "category": "Others", "quantity": 20, "minimumStock": 10, "unitPrice": 45, "unit": "PCS" },
+  { "name": "Sugar Sachets", "description": "Brown sugar, 5g sachets", "category": "Others", "quantity": 1000, "minimumStock": 400, "unitPrice": 0.8, "unit": "PCS" }
 ]

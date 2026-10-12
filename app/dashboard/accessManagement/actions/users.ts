@@ -11,200 +11,234 @@ import {
   deleteWithLog,
   updateWithLog,
 } from "@/lib/types/prismaLogger";
-import { realtime } from "@/lib/upstash/realtime";
+import { emitActivity } from "@/lib/upstash/realtime";
+import { ActionError, ActionResult, runAction } from "@/lib/action-result";
+
+const MODULE = "access-management";
 
 // Invite Action
-export async function inviteUserAction(input: UserFormValues) {
+export async function inviteUserAction(
+  input: UserFormValues,
+): Promise<ActionResult> {
   await requirePermission("access-management:create:users");
-  input = userFormSchema.parse(input);
-  const currentUser = await getCurrentUserWithName();
-  const userId = currentUser?.userId ?? null;
-  if (!input.firstName?.trim()) {
-    throw new Error("First name is required");
-  }
-  if (!input.lastName?.trim()) {
-    throw new Error("Last name is required");
-  }
-  if (!input.email) {
-    throw new Error("Email is required");
-  }
-  if (!input.roleId) {
-    throw new Error("Role is required");
-  }
-  // Check if user already exists
-  const exists = await prisma.user.findUnique({
-    where: { email: input.email },
-  });
 
-  if (exists) throw new Error("User already exists");
+  return runAction(
+    async () => {
+      input = userFormSchema.parse(input);
+      const currentUser = await getCurrentUserWithName();
+      const userId = currentUser?.userId ?? null;
+      if (!input.firstName?.trim()) {
+        throw new ActionError("First name is required");
+      }
+      if (!input.lastName?.trim()) {
+        throw new ActionError("Last name is required");
+      }
+      if (!input.email) {
+        throw new ActionError("Email is required");
+      }
+      if (!input.roleId) {
+        throw new ActionError("Role is required");
+      }
+      const email = input.email;
 
-  const existingInvitedUser = await prisma.userInvite.findUnique({
-    where: { email: input.email },
-  });
+      // Check if user already exists
+      const exists = await prisma.user.findUnique({
+        where: { email },
+      });
 
-  if (existingInvitedUser) {
-    throw new Error("An invitation has already been sent to this email");
-  }
+      if (exists) throw new ActionError("User already exists");
 
-  const token = randomBytes(32).toString("hex");
+      const existingInvitedUser = await prisma.userInvite.findUnique({
+        where: { email },
+      });
 
-  // Set expiry, e.g., 7 days from now
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      if (existingInvitedUser) {
+        throw new ActionError(
+          "An invitation has already been sent to this email",
+        );
+      }
 
-  const invite = (await createWithLog(
-    "userInvite",
-    {
-      createdBy: currentUser?.fullName ?? "System",
-      email: input.email,
-      firstName: input.firstName,
-      lastName: input.lastName,
-      roleId: input.roleId,
-      token,
-      expiresAt,
+      const token = randomBytes(32).toString("hex");
+
+      // Set expiry, e.g., 7 days from now
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      // Sending the email inside the transaction means a failed send rolls
+      // the invite back, instead of leaving an invite nobody received
+      const invite = await prisma.$transaction(
+        async (tx) => {
+          const created = (await createWithLog(
+            "userInvite",
+            {
+              createdBy: currentUser?.fullName ?? "System",
+              email,
+              firstName: input.firstName,
+              lastName: input.lastName,
+              roleId: input.roleId,
+              token,
+              expiresAt,
+            },
+            { userId, module: MODULE, submodule: "users", tx },
+          )) as { id: string };
+
+          await sendInviteEmail(email, token);
+          return created;
+        },
+        { timeout: 15_000 }, // SMTP can take a few seconds
+      );
+
+      await emitActivity({
+        action: "create",
+        module: MODULE,
+        submodule: "users",
+        recordId: invite.id,
+        user: currentUser?.fullName ?? null,
+        createdAt: new Date().toISOString(),
+      });
     },
     {
-      userId,
-      submodule: "users",
+      P2002: "An invitation has already been sent to this email",
+      P2003: "The selected role no longer exists.",
     },
-  )) as { id: string };
-
-  await realtime.emit("activity.created", {
-    action: "create",
-    module: "access-management",
-    submodule: "users",
-    recordId: invite.id,
-    user: currentUser?.fullName ?? null,
-    createdAt: new Date().toISOString(),
-  });
-
-  await sendInviteEmail(input.email, token);
-  return { success: true, token };
+  );
 }
 
 //Edit Action
-export async function editUserAction(input: UserFormValues) {
+export async function editUserAction(
+  input: UserFormValues,
+): Promise<ActionResult> {
   await requirePermission("access-management:update:users");
-  input = userFormSchema.parse(input);
 
-  const currentUser = await getCurrentUserWithName();
-  const userId = currentUser?.userId ?? null;
+  return runAction(
+    async () => {
+      input = userFormSchema.parse(input);
 
-  if (!input.id) {
-    throw new Error("User ID is required for editing");
-  }
+      const currentUser = await getCurrentUserWithName();
+      const userId = currentUser?.userId ?? null;
 
-  // Check if user exists
-  const user = await prisma.user.findUnique({
-    where: { id: input.id },
-  });
+      if (!input.id) {
+        throw new ActionError("User ID is required for editing");
+      }
 
-  const invite = await prisma.userInvite.findUnique({
-    where: { id: input.id },
-  });
+      // Check if user exists
+      const user = await prisma.user.findUnique({
+        where: { id: input.id },
+      });
 
-  if (!user && !invite) {
-    throw new Error("User or invite not found");
-  }
+      const invite = await prisma.userInvite.findUnique({
+        where: { id: input.id },
+      });
 
-  if (user) {
-    // Update user
-    await updateWithLog(
-      "user",
-      { id: input.id },
-      {
-        email: input.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: `${user.firstName} ${user.lastName}`,
-        roleId: input.roleId,
-        isActive: input.isActive,
-        updatedBy: currentUser?.fullName ?? "System",
-        updatedAt: new Date(),
-      },
-      { userId, submodule: "users" },
-    );
+      if (!user && !invite) {
+        throw new ActionError("User or invite not found");
+      }
 
-    await realtime.emit("activity.created", {
-      action: "update",
-      module: "access-management",
-      submodule: "users",
-      recordId: user.id,
-      user: currentUser?.fullName ?? null,
-      createdAt: new Date().toISOString(),
-    });
-  } else if (invite) {
-    // Update invite
-    await updateWithLog(
-      "userInvite",
-      { id: input.id },
-      {
-        email: input.email,
-        firstName: invite.firstName,
-        lastName: invite.lastName,
-        roleId: input.roleId,
-        updatedBy: currentUser?.fullName ?? "System",
-        updatedAt: new Date(),
-      },
-      { userId, submodule: "users" },
-    );
+      if (user) {
+        // Update user
+        await updateWithLog(
+          "user",
+          { id: input.id },
+          {
+            email: input.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: `${user.firstName} ${user.lastName}`,
+            roleId: input.roleId,
+            isActive: input.isActive,
+            updatedBy: currentUser?.fullName ?? "System",
+            updatedAt: new Date(),
+          },
+          { userId, module: MODULE, submodule: "users" },
+        );
 
-    await realtime.emit("activity.created", {
-      action: "update",
-      module: "access-management",
-      submodule: "users",
-      recordId: invite.id,
-      user: currentUser?.fullName ?? null,
-      createdAt: new Date().toISOString(),
-    });
-  }
+        await emitActivity({
+          action: "update",
+          module: MODULE,
+          submodule: "users",
+          recordId: user.id,
+          user: currentUser?.fullName ?? null,
+          createdAt: new Date().toISOString(),
+        });
+      } else if (invite) {
+        // Update invite
+        await updateWithLog(
+          "userInvite",
+          { id: input.id },
+          {
+            email: input.email,
+            firstName: invite.firstName,
+            lastName: invite.lastName,
+            roleId: input.roleId,
+            updatedBy: currentUser?.fullName ?? "System",
+            updatedAt: new Date(),
+          },
+          { userId, module: MODULE, submodule: "users" },
+        );
 
-  return { success: true };
+        await emitActivity({
+          action: "update",
+          module: MODULE,
+          submodule: "users",
+          recordId: invite.id,
+          user: currentUser?.fullName ?? null,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    },
+    {
+      P2002: "This email is already in use.",
+      P2003: "The selected role no longer exists.",
+    },
+  );
 }
 
 // Delete Action
 export async function deleteAccessAction(
   id: string,
   source: "USER" | "INVITE",
-) {
+): Promise<ActionResult> {
   await requirePermission("access-management:delete:users");
 
-  const currentUser = await getCurrentUserWithName();
-  const userId = currentUser?.userId ?? null;
+  return runAction(
+    async () => {
+      const currentUser = await getCurrentUserWithName();
+      const userId = currentUser?.userId ?? null;
 
-  if (!currentUser) throw new Error("Unauthorized.");
-  if (id === userId) throw new Error("You cannot delete your own account.");
+      if (!currentUser) throw new ActionError("Unauthorized.");
+      if (id === userId)
+        throw new ActionError("You cannot delete your own account.");
 
-  if (source === "USER") {
-    const existing = await prisma.user.findUnique({ where: { id } });
-    if (!existing) throw new Error("User not found");
+      if (source === "USER") {
+        const existing = await prisma.user.findUnique({ where: { id } });
+        if (!existing) throw new ActionError("User not found");
 
-    await deleteWithLog("user", { id }, { userId, submodule: "users" });
+        await deleteWithLog(
+          "user",
+          { id },
+          { userId, module: MODULE, submodule: "users" },
+        );
+      } else if (source === "INVITE") {
+        const existing = await prisma.userInvite.findUnique({ where: { id } });
+        if (!existing) throw new ActionError("Invite not found");
 
-    await realtime.emit("activity.created", {
-      action: "delete",
-      module: "access-management",
-      submodule: "users",
-      recordId: id,
-      user: currentUser?.fullName ?? null,
-      createdAt: new Date().toISOString(),
+        await deleteWithLog(
+          "userInvite",
+          { id },
+          { userId, module: MODULE, submodule: "users" },
+        );
+      } else {
+        throw new ActionError("Invalid source");
+      }
+
+      await emitActivity({
+        action: "delete",
+        module: MODULE,
+        submodule: "users",
+        recordId: id,
+        user: currentUser?.fullName ?? null,
+        createdAt: new Date().toISOString(),
+      });
     });
-  } else if (source === "INVITE") {
-    const existing = await prisma.userInvite.findUnique({ where: { id } });
-    if (!existing) throw new Error("Invite not found");
-
-    await deleteWithLog("userInvite", { id }, { userId, submodule: "users" });
-
-    await realtime.emit("activity.created", {
-      action: "delete",
-      module: "access-management",
-      submodule: "users",
-      recordId: id,
-      user: currentUser?.fullName ?? null,
-      createdAt: new Date().toISOString(),
-    });
-  }
-
-  return { success: true };
 }
 
 export async function getUsers() {

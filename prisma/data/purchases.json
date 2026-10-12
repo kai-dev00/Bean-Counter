@@ -1,0 +1,98 @@
+[
+  { "supplier": "Bean Traders Inc", "status": "RECEIVED", "daysAgo": 172, "createdBy": "kyle@gmail.com", "notes": "Monthly bean restock", "items": [
+    { "inventory": "Arabica Coffee Beans", "quantity": 20, "unitCost": 340 },
+    { "inventory": "House Espresso Blend", "quantity": 15, "unitCost": 390 } ] },
+  { "supplier": "PackRight Packaging", "status": "RECEIVED", "daysAgo": 165, "createdBy": "john@example.com", "notes": "Bulk cups order", "items": [
+    { "inventory": "Paper Cups 12oz", "quantity": 2000, "unitCost": 4.5 },
+    { "inventory": "Plastic Cold Cups 16oz", "quantity": 1500, "unitCost": 3.6 },
+    { "inventory": "Dome Lids", "quantity": 1500, "unitCost": 1.8 } ] },
+  { "supplier": "Café Equipment Co", "status": "RECEIVED", "daysAgo": 158, "createdBy": "kyle@gmail.com", "notes": "Second grinder for the bar", "items": [
+    { "inventory": "Coffee Grinder", "quantity": 1, "unitCost": 31000 },
+    { "inventory": "Milk Pitcher 600ml", "quantity": 4, "unitCost": 600 } ] },
+  { "supplier": "Fresh Dairy Distributors", "status": "RECEIVED", "daysAgo": 150, "createdBy": "john@example.com", "items": [
+    { "inventory": "Fresh Whole Milk", "quantity": 120, "unitCost": 90 },
+    { "inventory": "Heavy Whipping Cream", "quantity": 10, "unitCost": 300 } ] },
+
+  { "supplier": "Benguet Highland Coffee", "status": "RECEIVED", "daysAgo": 138, "createdBy": "kyle@gmail.com", "notes": "Trial batch of local arabica", "items": [
+    { "inventory": "Benguet Arabica Beans", "quantity": 15, "unitCost": 410 } ] },
+  { "supplier": "Sweet Syrup Trading", "status": "RECEIVED", "daysAgo": 131, "createdBy": "john@example.com", "items": [
+    { "inventory": "Vanilla Syrup", "quantity": 12, "unitCost": 430 },
+    { "inventory": "Caramel Syrup", "quantity": 12, "unitCost": 430 },
+    { "inventory": "Hazelnut Syrup", "quantity": 6, "unitCost": 440 } ] },
+  { "supplier": "Golden Crust Bakery", "status": "RECEIVED", "daysAgo": 124, "createdBy": "john@example.com", "items": [
+    { "inventory": "Butter Croissant", "quantity": 60, "unitCost": 50 },
+    { "inventory": "Ensaymada", "quantity": 40, "unitCost": 42 } ] },
+  { "supplier": "Tea Garden Imports", "status": "CANCELLED", "daysAgo": 118, "createdBy": "kyle@gmail.com", "notes": "Supplier out of stock, cancelled", "items": [
+    { "inventory": "Ceremonial Matcha Powder", "quantity": 2000, "unitCost": 4.2 } ] },
+
+  { "supplier": "Bean Traders Inc", "status": "RECEIVED", "daysAgo": 108, "createdBy": "kyle@gmail.com", "notes": "Monthly bean restock", "items": [
+    { "inventory": "Arabica Coffee Beans", "quantity": 25, "unitCost": 345 },
+    { "inventory": "Robusta Coffee Beans", "quantity": 10, "unitCost": 250 },
+    { "inventory": "Decaf Colombian Beans", "quantity": 5, "unitCost": 500 } ] },
+  { "supplier": "GreenLeaf Plant Milks", "status": "RECEIVED", "daysAgo": 101, "createdBy": "john@example.com", "items": [
+    { "inventory": "Oat Milk", "quantity": 24, "unitCost": 175 },
+    { "inventory": "Almond Milk", "quantity": 12, "unitCost": 185 },
+    { "inventory": "Soy Milk", "quantity": 12, "unitCost": 112 } ] },
+  { "supplier": "CleanPro Solutions", "status": "RECEIVED", "daysAgo": 95, "createdBy": "john@example.com", "items": [
+    { "inventory": "Espresso Machine Cleaner", "quantity": 4, "unitCost": 900 },
+    { "inventory": "Milk Frother Cleaner", "quantity": 4, "unitCost": 650 },
+    { "inventory": "Food-Safe Sanitizer", "quantity": 6, "unitCost": 520 } ] },
+  { "supplier": "Tea Garden Imports", "status": "RECEIVED", "daysAgo": 88, "createdBy": "kyle@gmail.com", "items": [
+    { "inventory": "Ceremonial Matcha Powder", "quantity": 2000, "unitCost": 4.3 },
+    { "inventory": "English Breakfast Tea Bags", "quantity": 6, "unitCost": 500 },
+    { "inventory": "Chamomile Tea Bags", "quantity": 4, "unitCost": 360 } ] },
+
+  { "supplier": "Batangas Barako Co", "status": "RECEIVED", "daysAgo": 76, "createdBy": "kyle@gmail.com", "notes": "Barako for the new iced menu", "items": [
+    { "inventory": "Barako Liberica Beans", "quantity": 20, "unitCost": 365 } ] },
+  { "supplier": "Fresh Dairy Distributors", "status": "RECEIVED", "daysAgo": 70, "createdBy": "john@example.com", "items": [
+    { "inventory": "Fresh Whole Milk", "quantity": 150, "unitCost": 92 },
+    { "inventory": "Condensed Milk", "quantity": 48, "unitCost": 60 } ] },
+  { "supplier": "PackRight Packaging", "status": "RECEIVED", "daysAgo": 63, "createdBy": "john@example.com", "items": [
+    { "inventory": "Paper Cups 16oz", "quantity": 1000, "unitCost": 5.4 },
+    { "inventory": "Cup Sleeves", "quantity": 1000, "unitCost": 1.3 },
+    { "inventory": "Paper Straws", "quantity": 3000, "unitCost": 0.9 },
+    { "inventory": "Kraft Takeaway Bags", "quantity": 500, "unitCost": 6.5 } ] },
+  { "supplier": "Golden Crust Bakery", "status": "RECEIVED", "daysAgo": 58, "createdBy": "john@example.com", "items": [
+    { "inventory": "Blueberry Muffin", "quantity": 40, "unitCost": 55 },
+    { "inventory": "Chocolate Chip Cookie", "quantity": 60, "unitCost": 32 },
+    { "inventory": "Banana Bread Loaf", "quantity": 6, "unitCost": 200 } ] },
+
+  { "supplier": "Bean Traders Inc", "status": "RECEIVED", "daysAgo": 45, "createdBy": "kyle@gmail.com", "notes": "Monthly bean restock", "items": [
+    { "inventory": "Arabica Coffee Beans", "quantity": 30, "unitCost": 350 },
+    { "inventory": "House Espresso Blend", "quantity": 20, "unitCost": 395 } ] },
+  { "supplier": "Sweet Syrup Trading", "status": "RECEIVED", "daysAgo": 40, "createdBy": "john@example.com", "items": [
+    { "inventory": "Chocolate Sauce", "quantity": 6, "unitCost": 670 },
+    { "inventory": "Salted Caramel Sauce", "quantity": 4, "unitCost": 700 },
+    { "inventory": "Vanilla Syrup", "quantity": 8, "unitCost": 440 } ] },
+  { "supplier": "Café Equipment Co", "status": "CANCELLED", "daysAgo": 36, "createdBy": "kyle@gmail.com", "notes": "Wrong model quoted, cancelled", "items": [
+    { "inventory": "Tamper 58mm", "quantity": 2, "unitCost": 1450 } ] },
+  { "supplier": "General Supplies PH", "status": "RECEIVED", "daysAgo": 32, "createdBy": "john@example.com", "items": [
+    { "inventory": "Receipt Paper Rolls", "quantity": 30, "unitCost": 42 },
+    { "inventory": "Sugar Sachets", "quantity": 2000, "unitCost": 0.7 },
+    { "inventory": "Microfiber Cloths", "quantity": 4, "unitCost": 300 } ] },
+
+  { "supplier": "Benguet Highland Coffee", "status": "RECEIVED", "daysAgo": 20, "createdBy": "kyle@gmail.com", "items": [
+    { "inventory": "Benguet Arabica Beans", "quantity": 20, "unitCost": 415 } ] },
+  { "supplier": "Fresh Dairy Distributors", "status": "RECEIVED", "daysAgo": 14, "createdBy": "john@example.com", "items": [
+    { "inventory": "Fresh Whole Milk", "quantity": 100, "unitCost": 94 },
+    { "inventory": "Heavy Whipping Cream", "quantity": 8, "unitCost": 305 } ] },
+  { "supplier": "GreenLeaf Plant Milks", "status": "RECEIVED", "daysAgo": 9, "createdBy": "john@example.com", "items": [
+    { "inventory": "Oat Milk", "quantity": 24, "unitCost": 180 },
+    { "inventory": "Almond Milk", "quantity": 12, "unitCost": 190 } ] },
+  { "supplier": "Tea Garden Imports", "status": "RECEIVED", "daysAgo": 5, "createdBy": "kyle@gmail.com", "items": [
+    { "inventory": "Ceremonial Matcha Powder", "quantity": 1000, "unitCost": 4.4 },
+    { "inventory": "Chai Spice Mix", "quantity": 1000, "unitCost": 1.1 } ] },
+
+  { "supplier": "Bean Traders Inc", "status": "DRAFT", "daysAgo": 3, "createdBy": "kyle@gmail.com", "notes": "Restock decaf and robusta", "items": [
+    { "inventory": "Decaf Colombian Beans", "quantity": 6, "unitCost": 510 },
+    { "inventory": "Robusta Coffee Beans", "quantity": 10, "unitCost": 255 } ] },
+  { "supplier": "Sweet Syrup Trading", "status": "DRAFT", "daysAgo": 2, "createdBy": "john@example.com", "notes": "Hazelnut is out", "items": [
+    { "inventory": "Hazelnut Syrup", "quantity": 8, "unitCost": 450 },
+    { "inventory": "Caramel Syrup", "quantity": 6, "unitCost": 440 } ] },
+  { "supplier": "PackRight Packaging", "status": "DRAFT", "daysAgo": 1, "createdBy": "john@example.com", "items": [
+    { "inventory": "Dome Lids", "quantity": 2000, "unitCost": 1.8 },
+    { "inventory": "Paper Cups 16oz", "quantity": 1000, "unitCost": 5.5 } ] },
+  { "supplier": "Golden Crust Bakery", "status": "DRAFT", "daysAgo": 0, "createdBy": "john@example.com", "notes": "Weekend pastry order", "items": [
+    { "inventory": "Banana Bread Loaf", "quantity": 4, "unitCost": 200 },
+    { "inventory": "Blueberry Muffin", "quantity": 30, "unitCost": 55 } ] }
+]

@@ -28,5 +28,45 @@
     "password": "Password123",
     "role": "ADMIN",
     "isActive": true
+  },
+  {
+    "email": "maria@example.com",
+    "firstName": "Maria",
+    "lastName": "Santos",
+    "fullName": "Maria Santos",
+    "phoneNumber": "+639171234501",
+    "password": "Password123",
+    "role": "MODERATOR",
+    "isActive": true
+  },
+  {
+    "email": "paolo@example.com",
+    "firstName": "Paolo",
+    "lastName": "Reyes",
+    "fullName": "Paolo Reyes",
+    "phoneNumber": "+639171234502",
+    "password": "Password123",
+    "role": "INVENTORY_CLERK",
+    "isActive": true
+  },
+  {
+    "email": "ana@example.com",
+    "firstName": "Ana",
+    "lastName": "Cruz",
+    "fullName": "Ana Cruz",
+    "phoneNumber": "+639171234503",
+    "password": "Password123",
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "email": "grace@example.com",
+    "firstName": "Grace",
+    "lastName": "Lim",
+    "fullName": "Grace Lim",
+    "phoneNumber": "+639171234504",
+    "password": "Password123",
+    "role": "USER",
+    "isActive": false
   }
 ]

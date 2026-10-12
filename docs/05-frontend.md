@@ -22,7 +22,7 @@
 | `/dashboard/profile` | [`profile/page.tsx`](../app/dashboard/profile/page.tsx) | Logged in | none |
 | `/dashboard/no-permission` | [`no-permission/page.tsx`](../app/dashboard/no-permission/page.tsx) | Logged in | Target of `requirePermission` |
 
-> ⚠️ `/dashboard/accessManagement` ([`page.tsx`](../app/dashboard/accessManagement/page.tsx)) redirects to `/access-management/users`, which doesn't exist (404). The sidebar links directly to `/users` and `/roles`, so users don't normally hit this.
+> `/dashboard/accessManagement` ([`page.tsx`](../app/dashboard/accessManagement/page.tsx)) redirects to `/dashboard/accessManagement/users`.
 
 Every dashboard route also has [`loading.tsx`](../app/dashboard/loading.tsx) (skeleton) and [`error.tsx`](../app/dashboard/error.tsx) (error card with "Try again"). Page titles are set with `export const metadata = { title }` and the template `%s · Bean Counter` in [`app/layout.tsx`](../app/layout.tsx).
 

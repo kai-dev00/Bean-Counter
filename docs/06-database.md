@@ -17,7 +17,7 @@ erDiagram
   User ||--o{ Session : "has (cascade)"
   User ||--o{ PasswordReset : "has (cascade)"
   User |o--o{ ActionLog : "performed"
-  Category ||--o{ Inventory : "contains (cascade)"
+  Category ||--o{ Inventory : "contains (restrict)"
   Inventory ||--o{ PurchaseItem : "ordered in"
   Supplier ||--o{ Purchase : "receives"
   Purchase ||--o{ PurchaseItem : "has (cascade)"
@@ -184,7 +184,7 @@ erDiagram
 
 | Column | Type | Notes |
 |---|---|---|
-| `categoryId` | `String` | FK → `Category` (**cascade delete**), **index** |
+| `categoryId` | `String` | FK → `Category` (**restrict**: a category can't be deleted while it has items), **index** |
 | `name` | `String` | **unique** |
 | `description` | `String?` | |
 | `quantity` | `Decimal` | default 0 (decimal so it can hold weights and volumes) |
@@ -224,20 +224,20 @@ erDiagram
 
 ## Seed data
 
-`npx prisma db seed` runs [`prisma/seed.ts`](../prisma/seed.ts) with `tsx`. It uses upserts, so it's safe to run more than once. The data lives in [`prisma/data/`](../prisma/data):
+`npx prisma db seed` runs [`prisma/seed.ts`](../prisma/seed.ts) with `tsx`. It uses upserts (and skips purchases if any exist), so it's safe to run more than once. The data lives in [`prisma/data/`](../prisma/data):
 
 | File | Rows | What's created |
 |---|---|---|
 | `permissions.json` | 26 | `read/create/update/delete` for `inventory`, `category`, `supplier`, `purchase`, plus `access-management` × `users`/`roles`, plus `dashboard:read` and `reports:read` |
-| `roles.json` | 3 | `ADMIN` (`"all"`), `MODERATOR` (module list + extras), `USER` (`"read_only"` = every `read` permission) |
-| `users.json` | 3 | One user per role, with **plain-text starter passwords** that get hashed while seeding |
-| `categories.json` | 3 | Sample categories |
-| `inventories.json` | 3 | Sample items, linked by category name |
-| `suppliers.json` | 3 | Sample suppliers |
+| `roles.json` | 4 | `ADMIN` (`"all"`), `MODERATOR` (module list + extras), `INVENTORY_CLERK` (inventory + read access, can draft purchases), `USER` (`"read_only"` = every `read` permission) |
+| `users.json` | 7 | At least one user per role, plus one **inactive** user (`grace@example.com`). **Plain-text starter passwords** (`Password123`) are hashed while seeding |
+| `invites.json` | 2 | One pending and one expired invite (random tokens; no email is sent) |
+| `categories.json` | 9 | Café categories with emoji icons and colours |
+| `inventories.json` | 47 | Items linked by category name. `status` is computed with `computeInventoryStatus`, and the data includes low, critical, out-of-stock and discontinued items |
+| `suppliers.json` | 12 | Suppliers with PH contact details |
+| `purchases.json` | 28 | Purchases over the last ~6 months (dates are `daysAgo`, relative to when you seed): received, cancelled and 4 drafts. Each gets `ActionLog` rows so the activity feed has history. Seeded inventory quantities are treated as current stock, so received purchases don't add to them |
 
-Purchases aren't seeded.
-
-> ⚠️ The `MODERATOR` definition lists the modules `"categories"`, `"users"`, `"roles"`, but the real permission modules are `category` and `access-management`. So the seeded MODERATOR gets **no** category permissions and **no** users/roles read access.
+> `MODERATOR` lists whole modules (`category`, `inventory`, `supplier`, `purchase`) plus single permissions in `extra` (`dashboard:read`, `reports:read`, `access-management:read:users`, `access-management:read:roles`). The seed fails if `roles.json` names a module that doesn't exist.
 
 ## Row-level security / access rules
 

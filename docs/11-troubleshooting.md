@@ -22,26 +22,22 @@ These were already there: `Permission.description` is `string | null` in Prisma 
 
 ## Runtime errors
 
-### Writes show "Something went wrong" but the data is saved
+### The live activity feed doesn't update
 
-Every server action calls `realtime.emit(...)` **after** writing to the database. If the Upstash credentials are missing or wrong, the emit throws, the action fails, and the client shows an error, even though the row (and its audit log) were already saved.
+Actions call `emitActivity(...)` after writing. If the Upstash credentials are missing or wrong, the emit fails, the error is logged to the server console (`Realtime emit failed:`), and the write still succeeds. Set valid `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`.
 
-**Fix:** set valid `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`. The longer-term fix is to wrap the emit in `try/catch` so realtime failures don't break writes.
+### Delete fails with "… can't be deleted" (Prisma `P2003`)
 
-### Delete fails with a foreign-key error (Prisma `P2003`)
+These records can't be deleted while other rows reference them, and the action says why:
 
-These records can't be deleted while other rows reference them:
-
-- **Inventory item** that appears in any purchase (`PurchaseItem.inventoryId` has no cascade)
-- **Category** whose inventories appear in purchases (the category cascade deletes inventories, which then hits the rule above)
+- **Inventory item** that appears in any purchase (`PurchaseItem.inventoryId` has no cascade). Mark it discontinued instead.
+- **Category** that still has items (`Inventory.categoryId` is `ON DELETE RESTRICT`). Move or delete the items first.
 - **Supplier** that has purchases
-- **Role** assigned to users or invites (the action checks this and shows a clear message)
-
-The UI currently shows a generic error for the first three.
+- **Role** assigned to users or invites
 
 ### Create fails for a duplicate name (Prisma `P2002`)
 
-`Inventory.name`, `Category.name`, `Supplier.name`, `Role.name`, `User.email` and `UserInvite.email` are unique. Only roles and invites check this first and return a friendly message.
+`Inventory.name`, `Category.name`, `Supplier.name`, `Role.name`, `User.email` and `UserInvite.email` are unique. The action returns a message like "A category with this name already exists."
 
 ### "A tree hydrated but some attributes … didn't match"
 
@@ -58,19 +54,14 @@ This happens with `CustomButton asChild` (Radix `Slot`) when it receives more th
 - Auth cookies are `secure: true`. Over plain HTTP on anything other than `localhost` (for example a LAN IP or a staging server without TLS), the browser drops them. Use HTTPS, or `localhost` for development.
 - If `ACCESS_TOKEN_SECRET` / `REFRESH_TOKEN_SECRET` changed, existing tokens stop verifying. Log in again.
 - `/api/auth/refresh` logs `🔄 Refresh API called` / `❌ Refresh failed:` to the server console. Check it for the reason.
-- Someone else logging out currently revokes **every** user's refresh session ([07 #4](./07-auth-and-security.md#security-findings)). Your access token keeps working for up to 15 minutes, then you're sent to login.
 
 ### Deactivated user can still log in
 
 Deactivated users (`isActive = false`) are rejected at login and on token refresh, and lose the realtime feed.
 
-### `/dashboard/accessManagement` shows 404
+### MODERATOR users are missing permissions
 
-That page redirects to `/access-management/users`, which doesn't exist. Use `/dashboard/accessManagement/users` or `/dashboard/accessManagement/roles`.
-
-### MODERATOR users can't see Category, Users or Roles
-
-The seed uses the wrong module names for MODERATOR ([06](./06-database.md#seed-data)). Edit the role in **Role Management** and tick the permissions, or fix `prisma/data/roles.json` and re-seed.
+Databases seeded before the `roles.json` fix gave MODERATOR no category, users or roles permissions. Re-run `npx prisma db seed` (the role upsert replaces its permission set) or tick the permissions in **Role Management**.
 
 ## Email
 

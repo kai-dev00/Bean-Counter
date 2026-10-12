@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { Category } from "@/app/generated/prisma/browser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,17 +37,17 @@ export default function CategoryForm({
   const onSubmit = async (values: CategoryFormValues) => {
     try {
       if (category) {
-        await updateCategory(category.id, values);
+        await unwrap(updateCategory(category.id, values));
         showToast.success("Category successfully updated");
       } else {
-        await createCategory(values);
+        await unwrap(createCategory(values));
         showToast.success("Category successfully created");
       }
 
       router.refresh();
       onSuccess();
-    } catch {
-      showToast.error("Something went wrong");
+    } catch (err) {
+      showToast.error("Something went wrong", (err as Error).message);
     }
   };
 

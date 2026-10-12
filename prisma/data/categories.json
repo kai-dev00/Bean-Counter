@@ -1,20 +1,56 @@
 [
   {
     "name": "Coffee Beans",
-    "description": "Various coffee bean types and blends",
-    "icon": "NA",
+    "description": "Single origins, blends and decaf beans",
+    "icon": "☕",
     "color": "#6F4E37"
   },
   {
+    "name": "Dairy & Alternatives",
+    "description": "Milk, cream and plant-based milks",
+    "icon": "🥛",
+    "color": "#60A5FA"
+  },
+  {
+    "name": "Syrups & Sauces",
+    "description": "Flavor syrups, sauces and sweeteners",
+    "icon": "🍯",
+    "color": "#F59E0B"
+  },
+  {
+    "name": "Tea & Matcha",
+    "description": "Loose-leaf tea, tea bags and matcha powder",
+    "icon": "🍵",
+    "color": "#10B981"
+  },
+  {
+    "name": "Pastries & Bakery",
+    "description": "Baked goods and baking ingredients",
+    "icon": "🥐",
+    "color": "#D97706"
+  },
+  {
+    "name": "Packaging & Disposables",
+    "description": "Cups, lids, sleeves, straws and takeaway bags",
+    "icon": "🥤",
+    "color": "#8B5CF6"
+  },
+  {
+    "name": "Cleaning Supplies",
+    "description": "Machine cleaners, sanitizers and cloths",
+    "icon": "🧽",
+    "color": "#14B8A6"
+  },
+  {
     "name": "Equipments",
-    "description": "Café equipment and tools",
-    "icon": "NA",
+    "description": "Café equipment, tools and spare parts",
+    "icon": "⚙️",
     "color": "#6B7280"
   },
   {
     "name": "Others",
     "description": "Miscellaneous items",
-    "icon": "NA",
+    "icon": "📦",
     "color": "#9CA3AF"
   }
 ]

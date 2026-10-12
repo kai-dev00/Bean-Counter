@@ -1,0 +1,18 @@
+[
+  {
+    "email": "leo@example.com",
+    "firstName": "Leo",
+    "lastName": "Garcia",
+    "role": "USER",
+    "invitedBy": "kyle@gmail.com",
+    "expiresInDays": 5
+  },
+  {
+    "email": "bea@example.com",
+    "firstName": "Bea",
+    "lastName": "Tan",
+    "role": "INVENTORY_CLERK",
+    "invitedBy": "kyle@gmail.com",
+    "expiresInDays": -2
+  }
+]

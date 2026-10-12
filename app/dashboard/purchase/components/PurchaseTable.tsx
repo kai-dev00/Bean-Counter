@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { DataTable, Column } from "@/components/DataTable";
 import CustomButton from "@/components/CustomButton";
 import {
@@ -53,12 +54,12 @@ export default function PurchaseTable({
     if (!deletePurchaseItem) return;
     setDeleting(true);
     try {
-      await deletePurchase(deletePurchaseItem.id);
+      await unwrap(deletePurchase(deletePurchaseItem.id));
       showToast.success("Purchase deleted");
       router.refresh();
       setDeletePurchaseItem(null);
     } catch (err) {
-      showToast.error("Delete failed", "Unable to delete purchase");
+      showToast.error("Delete failed", (err as Error).message);
     } finally {
       setDeleting(false);
     }
@@ -72,7 +73,7 @@ export default function PurchaseTable({
   const handleReceive = async (id: string) => {
     setReceiving(id);
     try {
-      await receivePurchase(id);
+      await unwrap(receivePurchase(id));
       showToast.success("Purchase received", "Inventory has been updated");
       router.refresh();
     } catch (err: any) {
@@ -85,7 +86,7 @@ export default function PurchaseTable({
   const handleCancel = async (id: string) => {
     setCancelling(id);
     try {
-      await cancelPurchase(id);
+      await unwrap(cancelPurchase(id));
       showToast.success("Purchase cancelled");
       router.refresh();
     } catch (err: any) {

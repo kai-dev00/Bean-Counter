@@ -16,7 +16,7 @@ There is no REST/GraphQL API for third parties.
 | Auth helpers | [`lib/auth.ts`](../lib/auth.ts) | `getCurrentUser()` → `{ userId, roleId }` from the `access_token` cookie (or `null`). `getCurrentUserWithName()` adds `fullName`. `getCurrentUserWithDetails()` adds email, phone and role with its permissions. |
 | Permission guard | [`lib/auth-guard.ts`](../lib/auth-guard.ts) | `requirePermission("module:action[:submodule]")` redirects to `/login` (no session) or `/dashboard/no-permission` (missing permission). |
 | Audit logging | [`lib/types/prismaLogger.ts`](../lib/types/prismaLogger.ts) | See [Audit log](#audit-log). |
-| Realtime | [`lib/upstash/realtime.ts`](../lib/upstash/realtime.ts) | `realtime.emit("activity.created", payload)` |
+| Realtime | [`lib/upstash/realtime.ts`](../lib/upstash/realtime.ts) | `emitActivity(payload)`: best-effort wrapper around `realtime.emit("activity.created", …)` |
 | Email | [`lib/email/index.ts`](../lib/email/index.ts) | `sendInviteEmail(to, token)`, `sendResetPasswordEmail(to, token)` |
 | Edge auth | [`proxy.ts`](../proxy.ts) | See [03](./03-architecture.md#authentication-at-the-edge) / [07](./07-auth-and-security.md) |
 
@@ -30,7 +30,7 @@ There is no REST/GraphQL API for third parties.
 
 ## Server actions
 
-Server actions are called like functions from client components. They signal errors by **throwing `Error`**, and callers catch them and show a toast. "Permission check" below means a **server-side** check. The UI hides buttons based on permissions, but that isn't enforced on the server.
+Server actions are called like functions from client components. Every action checks its permission with `requirePermission`, then returns an `ActionResult` (`{ success: true }` or `{ success: false, error }`) instead of throwing, because Next.js hides thrown messages in production. Dashboard actions do this through `runAction` in [`lib/action-result.ts`](../lib/action-result.ts); client code calls them through `unwrap(...)` ([`lib/unwrap-action.ts`](../lib/unwrap-action.ts)), which turns a failure back into a thrown `Error` for the existing `try/catch` + toast handlers.
 
 ### Auth: `app/actions/`
 
@@ -48,35 +48,35 @@ Server actions are called like functions from client components. They signal err
 
 | Action | Input | Behaviour | Permission check | Errors |
 |---|---|---|---|---|
-| `createInventory` | `InventoryFormValues` (`name, description?, quantity, minimumStock, unitPrice, unit, categoryId, discontinued`) | Calculates `status` with `computeInventoryStatus(quantity, minimumStock, discontinued)`, then `createWithLog` + emit | ❌ | Prisma errors (for example a duplicate `name`) |
-| `updateInventory` | `(id, InventoryFormValues)` | Recalculates `status`, then `updateWithLog` + emit | ❌ | `Inventory ID is required for editing`, `Inventory not found` |
-| `deleteInventory` | `id` | `deleteWithLog` + emit | ❌ | `Inventory ID is required`, `Inventory not found`. ⚠️ Fails with a foreign-key error if any `PurchaseItem` references the item |
+| `createInventory` | `InventoryFormValues` (`name, description?, quantity, minimumStock, unitPrice, unit, categoryId, discontinued`) | Calculates `status` with `computeInventoryStatus(quantity, minimumStock, discontinued)`, then `createWithLog` + emit | ✅ | Prisma errors (for example a duplicate `name`) |
+| `updateInventory` | `(id, InventoryFormValues)` | Recalculates `status`, then `updateWithLog` + emit | ✅ | `Inventory ID is required for editing`, `Inventory not found` |
+| `deleteInventory` | `id` | `deleteWithLog` + emit | ✅ | `Inventory ID is required`, `Inventory not found`. ⚠️ Fails with a foreign-key error if any `PurchaseItem` references the item |
 
 ### Category: [`app/dashboard/category/actions.ts`](../app/dashboard/category/actions.ts)
 
 | Action | Input | Behaviour | Permission check | Errors |
 |---|---|---|---|---|
-| `createCategory` | `{ name, description?, icon?, color? }` | `createWithLog` + emit | ❌ | Prisma unique error on `name` |
-| `updateCategory` | `(id, values)` | `updateWithLog` + emit | ❌ | `Category ID is required for editing`, `Category not found` |
-| `deleteCategory` | `id` | `deleteWithLog` + emit. Inventories **cascade-delete** | ❌ | same as above. ⚠️ Fails if any of its inventories have purchase items |
+| `createCategory` | `{ name, description?, icon?, color? }` | `createWithLog` + emit | ✅ | Prisma unique error on `name` |
+| `updateCategory` | `(id, values)` | `updateWithLog` + emit | ✅ | `Category ID is required for editing`, `Category not found` |
+| `deleteCategory` | `id` | Refuses while the category still has items, then `deleteWithLog` + emit | ✅ | `This category still has N item(s)…` |
 
 ### Supplier: [`app/dashboard/supplier/actions.ts`](../app/dashboard/supplier/actions.ts)
 
 | Action | Input | Behaviour | Permission check | Errors |
 |---|---|---|---|---|
-| `createSupplier` | `{ name, email, phone, address, notes? }` | `createWithLog` + emit | ❌ | Prisma unique error on `name` |
-| `updateSupplier` | `(id, values)` | `updateWithLog` + emit | ❌ | `Supplier ID is required for editing`, `Supplier not found` |
-| `deleteSupplier` | `id` | `deleteWithLog` + emit | ❌ | same. ⚠️ Fails if the supplier has purchases (no cascade) |
+| `createSupplier` | `{ name, email, phone, address, notes? }` | `createWithLog` + emit | ✅ | Prisma unique error on `name` |
+| `updateSupplier` | `(id, values)` | `updateWithLog` + emit | ✅ | `Supplier ID is required for editing`, `Supplier not found` |
+| `deleteSupplier` | `id` | `deleteWithLog` + emit | ✅ | same. ⚠️ Fails if the supplier has purchases (no cascade) |
 
 ### Purchase: [`app/dashboard/purchase/actions.ts`](../app/dashboard/purchase/actions.ts)
 
 | Action | Input | Behaviour | Permission check | Errors |
 |---|---|---|---|---|
-| `createPurchase` | `PurchaseFormValues` (`supplierId, notes?, items[{inventoryId, quantity, unitCost}]`) | `total = Σ quantity × unitCost`. Creates the purchase and nested items with status `DRAFT` | ❌ | Prisma errors |
-| `updatePurchase` | `(id, values)` | DRAFT only. Deletes all items, then updates the purchase with recreated items and a new total | ❌ | `Purchase not found`, `Only DRAFT purchases can be edited` |
-| `receivePurchase` | `id` | DRAFT only. For each item: `inventory.quantity += item.quantity`, then recalculates that item's status (keeping `discontinued`). Then sets the purchase to `RECEIVED` | ❌ | `Purchase not found`, `Only DRAFT purchases can be received` |
-| `cancelPurchase` | `id` | DRAFT only. Sets `CANCELLED` | ❌ | `Purchase not found`, `Only DRAFT purchases can be cancelled` |
-| `deletePurchase` | `id` | DRAFT only. `deleteWithLog` (items cascade) | ❌ | `Purchase not found`, `Only DRAFT purchases can be deleted` |
+| `createPurchase` | `PurchaseFormValues` (`supplierId, notes?, items[{inventoryId, quantity, unitCost}]`) | `total = Σ quantity × unitCost`. Creates the purchase and nested items with status `DRAFT` | ✅ | Prisma errors |
+| `updatePurchase` | `(id, values)` | DRAFT only. In one update: replaces all items and sets the new total | ✅ | `Purchase not found`, `Only DRAFT purchases can be edited` |
+| `receivePurchase` | `id` | DRAFT only. In one transaction: sets the purchase to `RECEIVED`, then for each item `inventory.quantity += item.quantity` and recalculates its status (keeping `discontinued`) | ✅ | `Purchase not found`, `Only DRAFT purchases can be received` |
+| `cancelPurchase` | `id` | DRAFT only. Sets `CANCELLED` | ✅ | `Purchase not found`, `Only DRAFT purchases can be cancelled` |
+| `deletePurchase` | `id` | DRAFT only. `deleteWithLog` (items cascade) | ✅ | `Purchase not found`, `Only DRAFT purchases can be deleted` |
 
 ```mermaid
 stateDiagram-v2
@@ -89,27 +89,26 @@ stateDiagram-v2
   CANCELLED --> [*]
 ```
 
-> ⚠️ `updatePurchase` and `receivePurchase` run several queries **without a transaction**. If something fails partway, the data can be left inconsistent (items deleted but the purchase not updated, or stock added but the status still `DRAFT`).
+> `updatePurchase` replaces the line items in the same update as the purchase. `receivePurchase` marks the purchase `RECEIVED` and adds stock in one transaction. Edits, receive, cancel and delete include `status: "DRAFT"` in the write's `where`, so a purchase can't be received twice or edited after it was received, even by two people at once.
 
 ### Access management: users ([`actions/users.ts`](../app/dashboard/accessManagement/actions/users.ts))
 
 | Action | Input | Behaviour | Permission check | Errors |
 |---|---|---|---|---|
 | `inviteUserAction` | `UserFormValues` (`firstName, lastName, email, roleId`) | Rejects emails that already have a user or an invite. Creates a `UserInvite` (32-byte token, 7-day expiry), logs, emits, sends the invite email | ✅ `access-management:create:users` | `First name is required`, `Last name is required`, `Email is required`, `Role is required`, `User already exists`, `An invitation has already been sent to this email` |
-| `editUserAction` | `UserFormValues` with `id` | Updates a `User` (email, role, isActive) or a `UserInvite` (email, role), whichever the id matches | ❌ | `User ID is required for editing`, `User or invite not found` |
-| `deleteAccessAction` | `(id, "USER" \| "INVITE")` | Deletes the user or the invite | ❌ (only checks that someone is logged in) | `Unauthorized.`, `You cannot delete your own account.`, `User not found`, `Invite not found` |
-| `getUsers` / `getInvites` / `getRoles` | none | Read helpers used by the users page | ❌ | none |
+| `editUserAction` | `UserFormValues` with `id` | Updates a `User` (email, role, isActive) or a `UserInvite` (email, role), whichever the id matches | ✅ | `User ID is required for editing`, `User or invite not found` |
+| `deleteAccessAction` | `(id, "USER" \| "INVITE")` | Deletes the user or the invite | ✅ | `Unauthorized.`, `You cannot delete your own account.`, `User not found`, `Invite not found` |
+| `getUsers` / `getInvites` / `getRoles` | none | Read helpers used by the users page | ✅ | none |
 
 ### Access management: roles ([`actions/roles.ts`](../app/dashboard/accessManagement/actions/roles.ts))
 
 | Action | Input | Behaviour | Permission check | Errors |
 |---|---|---|---|---|
-| `createRoleAction` | `RoleFormValues` (`name, description, permissionIds[]`) | Validates with `roleSchema.parse` (Zod), checks the name is unique, creates the role with its permissions, `revalidatePath("/roles")` | ❌ | Zod error, `Role with this name already exists` |
-| `updateRoleAction` | `(id, values)` | Same validation, then replaces the permission set (`set`) | ❌ | same |
-| `deleteRoleAction` | `id` | Blocks deleting your own role or a role still assigned to users or invites. Disconnects permissions, then deletes | ❌ | `Role not found`, `You cannot delete role that has been assigned to you.`, `Cannot delete role. N user(s) are assigned.`, `Cannot delete role. N invite(s) are assigned.` |
-| `getRolesCount` / `getRoleById` / `getAllPermissions` | none | Read helpers | ❌ | none |
+| `createRoleAction` | `RoleFormValues` (`name, description, permissionIds[]`) | Validates with `roleSchema.parse` (Zod), checks the name is unique, creates the role with its permissions, `revalidatePath("/roles")` | ✅ | Zod error, `Role with this name already exists` |
+| `updateRoleAction` | `(id, values)` | Same validation, then replaces the permission set (`set`) | ✅ | same |
+| `deleteRoleAction` | `id` | Blocks deleting your own role or a role still assigned to users or invites. Disconnects permissions, then deletes | ✅ | `Role not found`, `You cannot delete role that has been assigned to you.`, `Cannot delete role. N user(s) are assigned.`, `Cannot delete role. N invite(s) are assigned.` |
+| `getRolesCount` / `getRoleById` / `getAllPermissions` | none | Read helpers | ✅ | none |
 
-> ⚠️ `revalidatePath("/roles")` and `revalidatePath("/roles/<id>/edit")` use paths that don't exist (the real path is `/dashboard/accessManagement/roles`), so they do nothing.
 
 ### Other
 
@@ -131,24 +130,25 @@ stateDiagram-v2
 
 ## Audit log
 
-`createWithLog(model, data, { userId, submodule }, options?)`, `updateWithLog(model, where, data, ctx, options?)` and `deleteWithLog(model, where, ctx, { include?, before? })`:
+`createWithLog(model, data, ctx, options?)`, `updateWithLog(model, where, data, ctx, options?)` and `deleteWithLog(model, where, ctx, { include?, before? })`, where `ctx = { userId, submodule?, module?, tx? }`:
 
 1. Run the Prisma operation on `prisma[model]`.
-2. Insert an `ActionLog` row with `module = model name`, `action`, `recordId`, and `before` / `after` JSON snapshots.
+2. Insert an `ActionLog` row with `module` (the `module` option, defaulting to the model name), `action`, `recordId`, and `before` / `after` JSON snapshots.
 
-> ⚠️ The log row is inserted **after** the main write, outside a transaction. `module` is the Prisma model name (`userInvite`, `role`…), not the permission module (`access-management`). `todo's.ts` notes this as unresolved.
+Both writes run in **one transaction**, so a record is never saved without its log row. Pass `tx` to join a larger transaction (as `receivePurchase`, `deleteRoleAction` and `inviteUserAction` do). Access-management actions pass `module: "access-management"`. Rows written before that fix still have `user` / `userInvite` / `role`; the dashboard feed maps those to the right pages.
 
 ## Validation
 
 | Layer | What happens |
 |---|---|
-| Client | Every form uses React Hook Form + `zodResolver`. Schemas live next to the form (for example `inventorySchema` in [`InventoryClient.tsx`](../app/dashboard/inventory/InventoryClient.tsx), `purchaseSchema` in [`purchase/schema.ts`](../app/dashboard/purchase/schema.ts), `userFormSchema` / `roleSchema` in [`accessManagement/schema.ts`](../app/dashboard/accessManagement/schema.ts)). |
-| Server | Only `createRoleAction` / `updateRoleAction` re-validate with Zod. `inviteUserAction` checks required fields by hand. ⚠️ Every other action trusts its input. |
+| Client | Every form uses React Hook Form + `zodResolver`. Schemas live in each module's `schema.ts` (for example [`inventory/schema.ts`](../app/dashboard/inventory/schema.ts), [`purchase/schema.ts`](../app/dashboard/purchase/schema.ts), [`accessManagement/schema.ts`](../app/dashboard/accessManagement/schema.ts)). Auth schemas are in [`lib/validation/auth.ts`](../lib/validation/auth.ts). |
+| Server | Every action re-parses its input with the same schema, which also strips unknown fields. |
 | Database | Unique constraints (names, emails, tokens), enums, foreign keys. |
 
 ## Error handling
 
-- Actions `throw new Error("…")`. Client code wraps calls in `try/catch` and shows `showToast.error(...)` ([`lib/toast.ts`](../lib/toast.ts)), usually with a generic "Something went wrong".
+- Actions return `{ success: false, error }`. Inside `runAction`, throw `ActionError` for a message the user should see; Zod errors show their first issue; Prisma `P2002` / `P2003` / `P2025` become readable messages (each action can override them, e.g. "This supplier has purchases, so it can't be deleted."); anything else is logged and shown as a generic message.
+- Client code calls `await unwrap(action(...))` inside `try/catch` and shows `showToast.error(...)` ([`lib/toast.ts`](../lib/toast.ts)) with the error message.
 - Unexpected render errors in `/dashboard/*` are caught by [`app/dashboard/error.tsx`](../app/dashboard/error.tsx).
 - There's no structured logging. A few `console.log`s remain (for example in `/api/auth/refresh`).
 
@@ -161,7 +161,4 @@ stateDiagram-v2
 | Gmail SMTP (Nodemailer) | Invite and reset emails. Templates in [`lib/email/templates/`](../lib/email/templates) | `GMAIL_USER`, `GMAIL_PASS`, `SMTP_USER`, `NEXT_PUBLIC_APP_URL` |
 
 > ⚠️ **Gaps / TODO**
-> - Every action calls `requirePermission(...)` first, then validates its input with the module's Zod schema.
-> - Re-validate inputs on the server with the same Zod schemas.
-> - Wrap multi-step writes (purchase update and receive, plus the audit log insert) in `prisma.$transaction`.
 > - The email transport sets `service: "gmail"` together with `port: 465, secure: false`. Nodemailer's `service` preset overrides host and port, but the settings contradict each other.

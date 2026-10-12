@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { Category } from "@/app/generated/prisma/browser";
 import { DataTable, Column } from "@/components/DataTable";
 import CustomButton from "@/components/CustomButton";
@@ -43,12 +44,12 @@ export default function CategoryTable({
     if (!deleteUser) return;
     setDeleting(true);
     try {
-      await deleteCategory(deleteUser.id);
+      await unwrap(deleteCategory(deleteUser.id));
       showToast.success("Category deleted", "The category has been removed");
       router.refresh();
       setDeleteUser(null);
     } catch (err) {
-      showToast.error("Delete failed", "Unable to delete category");
+      showToast.error("Delete failed", (err as Error).message);
       console.error(err);
     } finally {
       setDeleting(false);

@@ -9,7 +9,7 @@
 | **A long-running Node.js server** (`next start`), or a platform that supports Next.js 16 server features | Server components, server actions, the `proxy.ts` edge logic, and route handlers |
 | **PostgreSQL** reachable via `DATABASE_URL` | All data |
 | **HTTPS** | Auth cookies are set with `secure: true`, so browsers won't send them over plain HTTP (except on `localhost`) |
-| **Upstash Redis** | Every write action calls `realtime.emit` |
+| **Upstash Redis** | Live activity feed and rate limiting (writes still work if it's down) |
 | **Outbound SMTP to Gmail** | Invite and reset emails |
 | All env vars from [02](./02-getting-started.md#environment-variables) | `NEXT_PUBLIC_APP_URL` must be the public URL, or email links will point to localhost |
 
@@ -49,7 +49,7 @@ Suggested per-environment settings:
 1. Review the remaining open items in [07 – Security findings](./07-auth-and-security.md#security-findings). The 🔴 items are fixed.
 2. Set every environment variable on the host.
 3. Run `npx prisma migrate deploy` against the production database **before** starting the new version.
-4. First deploy only: `npx prisma db seed` to create permissions and roles. ⚠️ This also creates the three sample users from `users.json`, so change their passwords right away or remove them from the seed.
+4. First deploy only: `npx prisma db seed` to create permissions and roles. ⚠️ This also creates the sample users, invites, inventory and purchases from `prisma/data/`, so change their passwords right away or remove them from the seed.
 5. Build and start the app, then check that login, a create action and the activity feed all work.
 
 ## Rollback

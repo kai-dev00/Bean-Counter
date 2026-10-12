@@ -13,7 +13,7 @@ Users are staff invited by an administrator. What each person can do depends on 
 | Role | Intended access (from seed) |
 |---|---|
 | `ADMIN` | Every permission |
-| `MODERATOR` | Inventory, supplier and purchase management, plus read access to users/roles ⚠️ *see [known issues](./12-roadmap-and-known-issues.md#bugs): the seed uses the wrong module names, so this role gets fewer permissions than intended* |
+| `MODERATOR` | Inventory, category, supplier and purchase management, dashboard and reports, plus read access to users/roles |
 | `USER` | Read-only access to every module |
 
 Admins can create more roles and assign any combination of the 26 permissions in the UI.

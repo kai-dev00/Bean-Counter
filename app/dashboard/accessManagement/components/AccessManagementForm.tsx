@@ -1,5 +1,6 @@
 "use client";
 
+import { unwrap } from "@/lib/unwrap-action";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@/components/CustomButton";
@@ -57,21 +58,21 @@ export default function AccessManagementForm({
   async function onSubmit(data: UserFormValues) {
     try {
       if (isEditMode && editUser) {
-        await editUserAction({
+        await unwrap(editUserAction({
           id: data.id!,
           // email: data.email,
           roleId: data.roleId,
           isActive: data.isActive,
-        });
+        }));
         showToast.success("User updated", "Changes were saved successfully");
       } else {
-        await inviteUserAction({
+        await unwrap(inviteUserAction({
           email: data.email,
           firstName: data.firstName!,
           lastName: data.lastName!,
           roleId: data.roleId,
           isActive: data.isActive,
-        });
+        }));
         showToast.success(
           "Invite sent",
           "The user will receive an email invitation",
