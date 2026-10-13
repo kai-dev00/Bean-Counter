@@ -31,5 +31,7 @@
   { "action": "read", "module": "access-management", "submodule": "roles" },
   { "action": "create", "module": "access-management", "submodule": "roles" },
   { "action": "update", "module": "access-management", "submodule": "roles" },
-  { "action": "delete", "module": "access-management", "submodule": "roles" }
+  { "action": "delete", "module": "access-management", "submodule": "roles" },
+
+  { "action": "read", "module": "access-management", "submodule": "logs" }
 ]

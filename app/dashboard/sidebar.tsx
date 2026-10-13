@@ -96,6 +96,11 @@ const navItems: NavItem[] = [
         href: "/dashboard/accessManagement/roles",
         permission: "access-management:read:roles",
       },
+      {
+        label: "System Logs",
+        href: "/dashboard/accessManagement/logs",
+        permission: "access-management:read:logs",
+      },
     ],
   },
 ];

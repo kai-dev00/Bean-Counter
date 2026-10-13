@@ -47,6 +47,22 @@ export function NavigationMenuDemo() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              href="/dashboard/accessManagement/logs"
+              className={cn(
+                "px-4 py-2 rounded-md text-sm font-medium",
+                pathname.includes("/logs")
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              System Logs
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
