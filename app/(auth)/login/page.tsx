@@ -6,6 +6,7 @@ import { JSX, useState } from "react";
 import { CustomInput } from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
+import { BrandLockup } from "@/components/BrandMark";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { LoginFormValues, loginSchema } from "@/lib/validation/auth";
@@ -46,6 +47,7 @@ export default function LoginForm(): JSX.Element {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
+        <BrandLockup />
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">
             Welcome to Bean Counter!

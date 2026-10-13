@@ -3,6 +3,7 @@
 import { resetPasswordAction } from "@/app/actions/auth.reset-password";
 import { CustomInput } from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
+import { BrandLockup } from "@/components/BrandMark";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -40,6 +41,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
+        <BrandLockup />
         <h1 className="text-xl font-semibold mb-4">Reset Password</h1>
         {serverError && (
           <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">

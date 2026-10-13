@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { LuCoffee } from "react-icons/lu";
 import {
   MdDashboard,
   MdInventory,
@@ -16,6 +15,7 @@ import { IoStatsChartSharp } from "react-icons/io5";
 import { IconType } from "react-icons";
 import LogoutButton from "@/components/LogoutButton";
 import CustomButton from "@/components/CustomButton";
+import { BrandMark } from "@/components/BrandMark";
 
 type SidebarUser = {
   fullName: string | null;
@@ -163,7 +163,7 @@ export default function DashboardSidebar({
       {/* Header */}
       <div className="h-16 py-4 border-b border-sidebar-border mb-2 flex items-center pl-3">
         <div className="flex items-center gap-2 font-semibold text-lg">
-          <LuCoffee className="size-5 shrink-0" />
+          <BrandMark className="size-6 text-sidebar-primary" />
           <span
             className={`transition-opacity duration-300 whitespace-nowrap ${
               !isExpanded ? "opacity-0 w-0 overflow-hidden" : "opacity-100"

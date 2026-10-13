@@ -24,6 +24,7 @@ export function getResetPasswordEmailTemplate({
                   <!-- Header -->
                   <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: center;">
+                      <img src="${process.env.NEXT_PUBLIC_APP_URL}/brand/icon-192.png" width="48" height="48" alt="Bean Counter" style="display: block; margin: 0 auto 16px auto; border: 0; border-radius: 10px;">
                       <h1 style="margin: 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">
                         Reset Your Password 🔐
                       </h1>
@@ -37,7 +38,7 @@ export function getResetPasswordEmailTemplate({
                         Hello,
                       </p>
                       <p style="margin: 0 0 16px 0; color: #4a5568; font-size: 16px; line-height: 1.5;">
-                        We received a request to reset your password for your <strong>Coffee Shop Inventory</strong> account.
+                        We received a request to reset your password for your <strong>Bean Counter</strong> account.
                       </p>
                       <p style="margin: 0 0 24px 0; color: #4a5568; font-size: 16px; line-height: 1.5;">
                         Click the button below to set a new password:
@@ -73,7 +74,7 @@ export function getResetPasswordEmailTemplate({
                         ${resetUrl}
                       </p>
                       <p style="margin: 0; color: #a0aec0; font-size: 12px; line-height: 1.5;">
-                        — Coffee Shop Inventory Team
+                        — Bean Counter Team
                       </p>
                     </td>
                   </tr>
