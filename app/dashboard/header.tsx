@@ -22,6 +22,7 @@ const routeTitles: Record<string, string> = {
   "/dashboard/accessManagement": "Access Management",
   "/dashboard/accessManagement/users": "Access Management",
   "/dashboard/accessManagement/roles": "Access Management",
+  "/dashboard/accessManagement/logs": "Access Management",
   "/dashboard/profile": "Profile",
 };
 
