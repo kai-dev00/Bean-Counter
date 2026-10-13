@@ -8,7 +8,7 @@ export function getInviteEmailTemplate({
   expiryDays = 7,
 }: InviteEmailProps) {
   return {
-    subject: "You're invited to join Coffee Shop Inventory",
+    subject: "You're invited to join Bean Counter",
     html: `
       <!DOCTYPE html>
       <html>
@@ -24,6 +24,7 @@ export function getInviteEmailTemplate({
                   <!-- Header -->
                   <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: center;">
+                      <img src="${process.env.NEXT_PUBLIC_APP_URL}/brand/icon-192.png" width="48" height="48" alt="Bean Counter" style="display: block; margin: 0 auto 16px auto; border: 0; border-radius: 10px;">
                       <h1 style="margin: 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">
                         You're Invited! ☕
                       </h1>
@@ -37,7 +38,7 @@ export function getInviteEmailTemplate({
                         Hello,
                       </p>
                       <p style="margin: 0 0 16px 0; color: #4a5568; font-size: 16px; line-height: 1.5;">
-                        You have been invited to join the <strong>Coffee Shop Inventory Management System</strong>.
+                        You have been invited to join <strong>Bean Counter</strong>, the coffee shop inventory system.
                       </p>
                       <p style="margin: 0 0 24px 0; color: #4a5568; font-size: 16px; line-height: 1.5;">
                         Click the button below to accept your invitation and set up your account:

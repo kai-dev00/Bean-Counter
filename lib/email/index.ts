@@ -19,7 +19,7 @@ export async function sendInviteEmail(to: string, token: string) {
   const { subject, html } = getInviteEmailTemplate({ inviteUrl });
 
   const mailOptions = {
-    from: `"Coffee Shop Inventory" <${process.env.SMTP_USER}>`,
+    from: `"Bean Counter" <${process.env.SMTP_USER}>`,
     to,
     subject,
     html,
@@ -34,7 +34,7 @@ export async function sendResetPasswordEmail(to: string, token: string) {
   const { subject, html } = getResetPasswordEmailTemplate({ resetUrl });
 
   const mailOptions = {
-    from: `"Coffee Shop Inventory" <${process.env.SMTP_USER}>`,
+    from: `"Bean Counter" <${process.env.SMTP_USER}>`,
     to,
     subject,
     html,

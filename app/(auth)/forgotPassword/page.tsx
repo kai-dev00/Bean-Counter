@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { CustomInput } from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
+import { BrandLockup } from "@/components/BrandMark";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ForgotPasswordFormValues,
@@ -41,6 +42,7 @@ export default function ForgotPasswordPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm">
+          <BrandLockup />
           <h1 className="text-xl font-semibold">Reset link has been sent</h1>
           <p className="text-sm text-muted-foreground mt-2">
             Please check your email to proceed.
@@ -61,6 +63,7 @@ export default function ForgotPasswordPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
       >
+        <BrandLockup />
         <h1 className="text-xl font-semibold mb-4">Forgot Password</h1>
         {serverError && (
           <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">

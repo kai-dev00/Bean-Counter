@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@/components/CustomButton";
+import { BrandLockup } from "@/components/BrandMark";
 import { CustomInput } from "@/components/CustomInput";
 import { useRouter } from "next/navigation";
 import { registerUserAction } from "@/app/actions/auth.register";
@@ -63,6 +64,7 @@ export default function RegisterForm({ token, inviteData }: Props) {
           onSubmit={handleSubmit(onSubmit)}
           className="w-full max-w-md space-y-5 rounded-xl border bg-card p-6 shadow-sm"
         >
+          <BrandLockup />
           <h1 className="text-xl font-semibold mb-4">
             Complete Your Registration
           </h1>
@@ -128,7 +130,7 @@ export default function RegisterForm({ token, inviteData }: Props) {
         <div className="text-center py-4">
           <div className="text-6xl mb-4">✓</div>
           <p className="text-sm text-muted-foreground">
-            Welcome to Coffee Shop Inventory, {inviteData.firstName}!
+            Welcome to Bean Counter, {inviteData.firstName}!
           </p>
         </div>
       </CustomModal>

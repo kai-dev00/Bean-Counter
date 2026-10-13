@@ -18,6 +18,7 @@
 | 10 | [Conventions](./10-conventions.md) | Code style, naming, git workflow, adding a new module |
 | 11 | [Troubleshooting](./11-troubleshooting.md) | Common errors and how to fix them |
 | 12 | [Roadmap & known issues](./12-roadmap-and-known-issues.md) | Open TODOs, bugs, limitations, suggested improvements |
+| 13 | [Brand](./13-brand.md) | Logo files, colours, usage rules |
 
 ## Quick start
 
