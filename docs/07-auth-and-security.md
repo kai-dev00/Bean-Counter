@@ -92,7 +92,7 @@ sequenceDiagram
 
 - A **permission** is `(module, action, submodule)`, written as a string `module:action` or `module:action:submodule`. Examples: `inventory:update`, `access-management:create:users`.
 - A **role** has many permissions, and each user has one role.
-- The **26 seeded permissions** cover `read/create/update/delete` for `inventory`, `category`, `supplier`, `purchase`, and `access-management:{users,roles}`, plus `dashboard:read` and `reports:read` (see [06](./06-database.md#seed-data)).
+- The **27 seeded permissions** cover `read/create/update/delete` for `inventory`, `category`, `supplier`, `purchase`, and `access-management:{users,roles}`, plus `access-management:read:logs`, `dashboard:read` and `reports:read` (see [06](./06-database.md#seed-data)).
 - Permissions are **not** stored in the JWT. They're read from the DB on each request (`getCurrentUserWithDetails`, `requirePermission`), so role changes apply on the next request.
 
 There are two ways permissions get checked:

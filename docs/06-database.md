@@ -228,7 +228,7 @@ erDiagram
 
 | File | Rows | What's created |
 |---|---|---|
-| `permissions.json` | 26 | `read/create/update/delete` for `inventory`, `category`, `supplier`, `purchase`, plus `access-management` × `users`/`roles`, plus `dashboard:read` and `reports:read` |
+| `permissions.json` | 27 | `read/create/update/delete` for `inventory`, `category`, `supplier`, `purchase`, plus `access-management` × `users`/`roles`, plus `access-management:read:logs`, `dashboard:read` and `reports:read` |
 | `roles.json` | 4 | `ADMIN` (`"all"`), `MODERATOR` (module list + extras), `INVENTORY_CLERK` (inventory + read access, can draft purchases), `USER` (`"read_only"` = every `read` permission) |
 | `users.json` | 7 | At least one user per role, plus one **inactive** user (`grace@example.com`). **Plain-text starter passwords** (`Password123`) are hashed while seeding |
 | `invites.json` | 2 | One pending and one expired invite (random tokens; no email is sent) |

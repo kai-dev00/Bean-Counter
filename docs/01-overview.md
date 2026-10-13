@@ -8,15 +8,16 @@ There is no public or customer-facing part. Every page except the auth screens s
 
 ## Who it's for
 
-Users are staff invited by an administrator. What each person can do depends on their **role**. The seed data creates three roles (see [`prisma/data/roles.json`](../prisma/data/roles.json)):
+Users are staff invited by an administrator. What each person can do depends on their **role**. The seed data creates four roles (see [`prisma/data/roles.json`](../prisma/data/roles.json)):
 
 | Role | Intended access (from seed) |
 |---|---|
 | `ADMIN` | Every permission |
 | `MODERATOR` | Inventory, category, supplier and purchase management, dashboard and reports, plus read access to users/roles |
+| `INVENTORY_CLERK` | Inventory management and drafting purchases, read access to category/supplier/purchase; can't receive, cancel or delete purchases |
 | `USER` | Read-only access to every module |
 
-Admins can create more roles and assign any combination of the 26 permissions in the UI.
+Admins can create more roles and assign any combination of the 27 permissions in the UI.
 
 ## Key features
 
@@ -28,7 +29,7 @@ Admins can create more roles and assign any combination of the 26 permissions in
 | **Supplier** | CRUD for supplier contact details | [`app/dashboard/supplier/`](../app/dashboard/supplier) |
 | **Purchase** | Purchase orders with line items. Lifecycle: `DRAFT` → `RECEIVED` (adds stock to inventory) or `CANCELLED` | [`app/dashboard/purchase/`](../app/dashboard/purchase) |
 | **Reports** | Inventory valuation and received-purchase summaries | [`app/dashboard/reports/`](../app/dashboard/reports) |
-| **Access management** | Invite users by email, edit role/active status, delete users or invites; create/edit roles and their permissions | [`app/dashboard/accessManagement/`](../app/dashboard/accessManagement) |
+| **Access management** | Invite users by email, edit role/active status, delete users or invites; create/edit roles and their permissions; browse the System Logs audit trail with field-by-field before/after changes | [`app/dashboard/accessManagement/`](../app/dashboard/accessManagement) |
 | **Auth** | Login, invite-based registration, forgot/reset password by email, change password on the profile page | [`app/(auth)/`](../app/(auth)), [`app/actions/`](../app/actions) |
 | **Audit log** | Every create/update/delete through the logging helpers stores a before/after snapshot in `ActionLog` and is pushed live to the dashboard | [`lib/types/prismaLogger.ts`](../lib/types/prismaLogger.ts) |
 | **Export** | Download table data as `.xlsx` | [`app/dashboard/utils/downloadExcel.ts`](../app/dashboard/utils/downloadExcel.ts) |
@@ -63,4 +64,3 @@ Versions are the ones installed in `node_modules`. `package.json` ranges are in 
 > ⚠️ **Gaps / TODO**
 > - `jsonwebtoken` and `@types/jsonwebtoken` are installed but never imported (JWTs use `jose`). They can be removed.
 > - There's no `engines` field, so the Node.js version isn't pinned. Development was done on Node 24.
-> - The root [`README.md`](../README.md) is still the `create-next-app` template.

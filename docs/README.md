@@ -30,4 +30,4 @@ npx prisma db seed            # load roles, permissions, sample data
 npm run dev                   # http://localhost:3000
 ```
 
-> ⚠️ **Read [07 – Auth & security](./07-auth-and-security.md#security-findings) before deploying.** Most server actions check permissions only in the UI, not on the server.
+> ⚠️ **Read [07 – Auth & security](./07-auth-and-security.md#security-findings) before deploying.** A few security findings are still open.

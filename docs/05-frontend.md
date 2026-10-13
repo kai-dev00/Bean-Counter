@@ -17,8 +17,9 @@
 | `/dashboard/reports` | [`reports/page.tsx`](../app/dashboard/reports/page.tsx) | Logged in | `reports:read` |
 | `/dashboard/accessManagement/users` | [`accessManagement/users/page.tsx`](../app/dashboard/accessManagement/users/page.tsx) | Logged in | `access-management:read:users` |
 | `/dashboard/accessManagement/roles` | [`accessManagement/roles/page.tsx`](../app/dashboard/accessManagement/roles/page.tsx) | Logged in | `access-management:read:roles` |
-| `/dashboard/accessManagement/roles/add` | [`roles/add/page.tsx`](../app/dashboard/accessManagement/roles/add/page.tsx) | Logged in | none |
-| `/dashboard/accessManagement/roles/[id]/edit` | [`roles/[id]/edit/page.tsx`](../app/dashboard/accessManagement/roles/[id]/edit/page.tsx) | Logged in | none |
+| `/dashboard/accessManagement/roles/add` | [`roles/add/page.tsx`](../app/dashboard/accessManagement/roles/add/page.tsx) | Logged in | `access-management:create:roles` |
+| `/dashboard/accessManagement/roles/[id]/edit` | [`roles/[id]/edit/page.tsx`](../app/dashboard/accessManagement/roles/[id]/edit/page.tsx) | Logged in | `access-management:update:roles` |
+| `/dashboard/accessManagement/logs` | [`accessManagement/logs/page.tsx`](../app/dashboard/accessManagement/logs/page.tsx) | Logged in | `access-management:read:logs` |
 | `/dashboard/profile` | [`profile/page.tsx`](../app/dashboard/profile/page.tsx) | Logged in | none |
 | `/dashboard/no-permission` | [`no-permission/page.tsx`](../app/dashboard/no-permission/page.tsx) | Logged in | Target of `requirePermission` |
 
